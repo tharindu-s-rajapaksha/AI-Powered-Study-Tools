@@ -1,0 +1,12 @@
+# Core Transcription & Audio
+faster-whisper
+pyaudio
+numpy
+moviepy
+
+# Note Generation & Translation
+google-generative-ai
+markdown
+
+# Utilities
+python-dotenv

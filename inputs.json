@@ -1,0 +1,17 @@
+{
+  "video_transcriber": {
+    "video_path": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp.mkv"
+  },
+  "note_generator": {
+    "text_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp_transcription"
+  },
+  "translate_sinhala_html": {
+    "input_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp_transcription_notes.html",
+    "output_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\translated_sinhala.html"
+  },
+  "html_comparison_viewer": {
+    "original_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp_transcription_notes.html",
+    "translated_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\translated_sinhala.html",
+    "output_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\comparison_view.html"
+  }
+}

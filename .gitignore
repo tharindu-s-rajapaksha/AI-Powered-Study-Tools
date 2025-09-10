@@ -1,0 +1,25 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment
+.env
+venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+
+# Output files
+output/
+*.mp3
+*.wav
+*_notes.html
+*_notes.txt
+*_transcription.txt
+comparison_view.html
+translated_sinhala.html
+transcript.txt
