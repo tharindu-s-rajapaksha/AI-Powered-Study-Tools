@@ -18,8 +18,30 @@
     "translated_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\translated_sinhala.html",
     "output_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\comparison_view.html"
   },
-  "video_silence_remover": {
-    "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_01.mp4",
-    "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_01_silence_removed.mp4"
-  }
+  "video_silence_remover": [
+    {
+      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_01.mp4",
+      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_01_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_02.mp4",
+      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_02_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_03.mp4",
+      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_03_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_04.mp4",
+      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_04_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_05.mp4",
+      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_05_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_06.mp4",
+      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_06_silence_removed.mp4"
+    }
+  ]
 }

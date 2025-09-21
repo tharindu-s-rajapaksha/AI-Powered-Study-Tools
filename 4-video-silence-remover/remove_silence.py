@@ -179,37 +179,39 @@ def main():
     except:
         pass
 
-    try:
-        # Install dependencies
-        check_and_install_dependencies()
-        
-        # Load configuration
-        video_info = load_config()
-        input_file = video_info["input_file"]
-        output_file = video_info["output_file"]
-        
-        logger.info(f"Input file: {input_file}")
-        logger.info(f"Output file: {output_file}")
-        
-        # Validate input
-        validate_input_file(input_file)
-        
-        # Create output directory
-        create_output_directory(output_file)
-        
-        # Run jumpcutter
-        run_jumpcutter(input_file, output_file, JUMPCUTTER_PARAMS)
-        
-        # Sound notification - completion
-        for freq in [480, 600, 720, 600, 480, 360]:
-            winsound.Beep(freq, 300)
-        
-        logger.info("Video processing completed successfully!")
-    except Exception as e:
-        # Error sound
-        winsound.Beep(300, 1000)
+    # Install dependencies
+    check_and_install_dependencies()
+    
+    # Load configuration
+    videos_info = load_config()
 
-        logger.error(e)
+    for video_info in videos_info:
+        try:
+            input_file = video_info["input_file"]
+            output_file = video_info["output_file"]
+                
+            logger.info(f"Input file: {input_file}")
+            logger.info(f"Output file: {output_file}")
+
+            # Validate input
+            validate_input_file(input_file)
+            
+            # Create output directory
+            create_output_directory(output_file)
+            
+            # Run jumpcutter
+            run_jumpcutter(input_file, output_file, JUMPCUTTER_PARAMS)
+            
+            # Sound notification - completion
+            for freq in [480, 600, 720, 600, 480, 360]:
+                winsound.Beep(freq, 300)
+            
+            logger.info("Video processing completed successfully!")
+        except Exception as e:
+            # Error sound
+            winsound.Beep(300, 1000)
+
+            logger.error(e)
 
 if __name__ == "__main__":
     main()
