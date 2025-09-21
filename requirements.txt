@@ -3,6 +3,8 @@ faster-whisper
 pyaudio
 numpy
 moviepy
+jumpcutter
+numpy<1.24
 
 # Note Generation & Translation
 google-generative-ai

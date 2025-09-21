@@ -9,9 +9,17 @@
     "input_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp_transcription_notes.html",
     "output_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\translated_sinhala.html"
   },
+  "translate_sinhala_md": {
+    "input_file": "D:\\Desktop\\Social Aspects of IT.md",
+    "output_file": "D:\\Desktop\\Social Aspects of IT - Sinhala.md"
+  },
   "html_comparison_viewer": {
     "original_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp_transcription_notes.html",
     "translated_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\translated_sinhala.html",
     "output_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\comparison_view.html"
+  },
+  "video_silence_remover": {
+    "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_01.mp4",
+    "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_01_silence_removed.mp4"
   }
 }

@@ -4,7 +4,7 @@ from faster_whisper import WhisperModel
 import json
 
 class VideoTranscriber:
-    def __init__(self, model_size="base", device="cuda", compute_type="int8"):
+    def __init__(self, model_size="small", device="cuda", compute_type="int8"):
         """
         Initialize the VideoTranscriber with the specified Whisper model parameters.
 
