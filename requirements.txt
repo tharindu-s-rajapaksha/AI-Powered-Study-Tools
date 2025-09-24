@@ -7,8 +7,14 @@ jumpcutter
 numpy<1.24
 
 # Note Generation & Translation
-google-generative-ai
+google-generativeai
+google-genai
+httpx
+pathlib
 markdown
+
+# PDF Processing
+PyPDF2
 
 # Utilities
 python-dotenv

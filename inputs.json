@@ -13,16 +13,17 @@
     "input_file": "D:\\Desktop\\Social Aspects of IT.md",
     "output_file": "D:\\Desktop\\Social Aspects of IT - Sinhala.md"
   },
+  "pdf_note_generator": {
+    "pdf_file": "/home/tharindu-sathsara/Desktop/IS4430 - Social Aspects of IT 1-10.pdf",
+    "start_page": 1,
+    "end_page": 4
+  },
   "html_comparison_viewer": {
     "original_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp_transcription_notes.html",
     "translated_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\translated_sinhala.html",
     "output_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\comparison_view.html"
   },
   "video_silence_remover": [
-    {
-      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_01.mp4",
-      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_01_silence_removed.mp4"
-    },
     {
       "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_02.mp4",
       "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_02_silence_removed.mp4"
