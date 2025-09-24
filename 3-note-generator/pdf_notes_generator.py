@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 from google import genai
 from dotenv import load_dotenv
+from PyPDF2 import PdfReader, PdfWriter
 
 # Load environment variables from .env file
 load_dotenv()
@@ -23,6 +24,58 @@ class SimplePDFNotesGenerator:
         timestamp = datetime.now().strftime("%H:%M:%S")
         print(f"[{timestamp}] {message}")
         
+    def create_output_folder(self, pdf_path: str, start_page: int, end_page: int):
+        """Create output folder based on page range."""
+        pdf_dir = os.path.dirname(pdf_path)
+        base_name = os.path.splitext(os.path.basename(pdf_path))[0]
+        folder_name = f"{base_name}_pages_{start_page}-{end_page}"
+        output_folder = os.path.join(pdf_dir, folder_name)
+        
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+            self.print_progress(f"Created output folder: {output_folder}")
+        else:
+            self.print_progress(f"Using existing folder: {output_folder}")
+            
+        return output_folder
+    
+    def extract_pdf_pages(self, pdf_path: str, start_page: int, end_page: int, output_folder: str):
+        """Extract specified pages from PDF and save to output folder."""
+        try:
+            # Adjust page numbers (subtract 1 for before, add 1 for after)
+            extract_start = max(1, start_page - 1)
+            extract_end = end_page + 1
+            
+            self.print_progress(f"Extracting pages {extract_start}-{extract_end} from PDF")
+            
+            # Read the original PDF
+            reader = PdfReader(pdf_path)
+            total_pages = len(reader.pages)
+            
+            # Adjust end page if it exceeds total pages
+            extract_end = min(extract_end, total_pages)
+            
+            writer = PdfWriter()
+            
+            # Add pages to writer (PyPDF2 uses 0-based indexing)
+            for page_num in range(extract_start - 1, extract_end):
+                if page_num < total_pages:
+                    writer.add_page(reader.pages[page_num])
+            
+            # Save extracted PDF
+            base_name = os.path.splitext(os.path.basename(pdf_path))[0]
+            extracted_pdf_name = f"{base_name}_pages_{extract_start}-{extract_end}.pdf"
+            extracted_pdf_path = os.path.join(output_folder, extracted_pdf_name)
+            
+            with open(extracted_pdf_path, 'wb') as output_file:
+                writer.write(output_file)
+            
+            self.print_progress(f"Extracted PDF saved to: {extracted_pdf_path}")
+            return extracted_pdf_path
+            
+        except Exception as e:
+            self.print_progress(f"Error extracting PDF pages: {e}")
+            raise
 
             
     def upload_pdf_to_gemini(self, pdf_path):
@@ -46,7 +99,7 @@ class SimplePDFNotesGenerator:
         """Generate notes from the uploaded PDF."""
         try:
             # Create the prompt for note generation
-            prompt = f"""This is a part of my lecture note (PDF). I will provide the full lecture note step by step. I need you to explain it simply in සිංහල language (Like explaining to a friend). First explain only {start_page}-{end_page} slides - with all the details in sinhala. (I have to actually learn in english. so add important points in sinhala and english both.) Use Markdown formatting."""
+            prompt = f"""This is a part of my lecture note (PDF). I will provide the full lecture note step by step. I need you to explain in සිංහල language (Like explaining to a friend). First explain only {start_page}-{end_page} slides - with all the details in sinhala. (I have to actually learn in english. so add important points in sinhala and english both.) Use Markdown formatting."""
 
             self.print_progress(f"Generating notes for pages {start_page}-{end_page}")
             
@@ -62,14 +115,13 @@ class SimplePDFNotesGenerator:
             self.print_progress(f"Error generating notes: {e}")
             return f"Error generating notes: {str(e)}"
             
-    def save_notes(self, notes: str, pdf_path: str, start_page: int, end_page: int):
+    def save_notes(self, notes: str, pdf_path: str, start_page: int, end_page: int, output_folder: str):
         """Save the generated notes to a markdown file."""
         base_name = os.path.splitext(os.path.basename(pdf_path))[0]
         output_file = f"{base_name}_pages_{start_page}-{end_page}_notes.md"
         
-        # Save in the same directory as the PDF
-        pdf_dir = os.path.dirname(pdf_path)
-        output_path = os.path.join(pdf_dir, output_file)
+        # Save in the output folder
+        output_path = os.path.join(output_folder, output_file)
         
         self.print_progress(f"Saving notes to {output_path}")
         
@@ -188,6 +240,7 @@ class SimplePDFNotesGenerator:
 </body>
 </html>"""
             
+            # Save HTML in the same folder as the markdown file
             output_html = notes_file.replace('.md', '.html')
             with open(output_html, "w", encoding='utf-8') as file:
                 file.write(styled_html)
@@ -217,15 +270,21 @@ class SimplePDFNotesGenerator:
             # Check if PDF file exists
             if not os.path.exists(pdf_path):
                 raise FileNotFoundError(f"PDF file not found: {pdf_path}")
-                
-            # Upload PDF to Gemini
-            pdf_file = self.upload_pdf_to_gemini(pdf_path)
+            
+            # Create output folder
+            output_folder = self.create_output_folder(pdf_path, start_page, end_page)
+            
+            # Extract pages from PDF
+            extracted_pdf_path = self.extract_pdf_pages(pdf_path, start_page, end_page, output_folder)
+            
+            # Upload extracted PDF to Gemini
+            pdf_file = self.upload_pdf_to_gemini(extracted_pdf_path)
             
             # Generate notes
             notes = self.generate_notes_from_pdf(pdf_file, start_page, end_page)
             
             # Save notes
-            notes_file = self.save_notes(notes, pdf_path, start_page, end_page)
+            notes_file = self.save_notes(notes, pdf_path, start_page, end_page, output_folder)
             
             # Convert to HTML
             html_file = self.convert_to_html(notes_file)
