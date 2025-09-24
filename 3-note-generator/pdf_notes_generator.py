@@ -147,7 +147,7 @@ class SimplePDFNotesGenerator:
                 notes_text = file.read()
             
             # Clean up the markdown formatting
-            notes_text = re.sub(r'(:\n\*   \*\*)', ':\n\n*   **', notes_text)
+            notes_text = re.sub(r'(:\n\*)', ':\n\n*', notes_text)
             
             # Convert to HTML
             html_content = markdown.markdown(notes_text)
