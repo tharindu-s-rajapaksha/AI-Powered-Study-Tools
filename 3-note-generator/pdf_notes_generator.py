@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import random
 import pathlib
 import markdown
 import json
@@ -12,8 +13,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class SimplePDFNotesGenerator:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, chunk_pages: int = 3, overlap_pages: int = 1):
         self.api_key = api_key
+        self.chunk_pages = chunk_pages      # Pages per chunk
+        self.overlap_pages = overlap_pages  # Overlap between chunks (pages)
         
         # Configure the client
         self.client = genai.Client(api_key=api_key)
@@ -22,6 +25,32 @@ class SimplePDFNotesGenerator:
         """Print a progress message with timestamp."""
         timestamp = datetime.now().strftime("%H:%M:%S")
         print(f"[{timestamp}] {message}")
+        
+    def calculate_page_chunks(self, start_page: int, end_page: int):
+        """Calculate page chunks for processing."""
+        total_pages = end_page - start_page + 1
+        chunks = []
+        
+        if total_pages <= self.chunk_pages:
+            # If total pages is small, process all at once
+            chunks.append((start_page, end_page))
+            self.print_progress(f"Processing all {total_pages} pages in one chunk")
+        else:
+            # Split into chunks with overlap
+            current_start = start_page
+            
+            while current_start <= end_page:
+                current_end = min(current_start + self.chunk_pages - 1, end_page)
+                chunks.append((current_start, current_end))
+                
+                # Move to next chunk with overlap
+                if current_end >= end_page:
+                    break
+                current_start = current_end - self.overlap_pages + 1
+            
+            self.print_progress(f"Split {total_pages} pages into {len(chunks)} chunks (chunk size: {self.chunk_pages}, overlap: {self.overlap_pages})")
+        
+        return chunks
         
 
             
@@ -45,22 +74,86 @@ class SimplePDFNotesGenerator:
     def generate_notes_from_pdf(self, pdf_file, start_page, end_page):
         """Generate notes from the uploaded PDF."""
         try:
-            # Create the prompt for note generation
-            prompt = f"""This is a part of my note (PDF). I will provide the full note step by step. I need you to explain the note in සිංහල language. First explain first 3 slides - all the details in sinhala. Use Markdown formatting."""
+            # Calculate page chunks
+            page_chunks = self.calculate_page_chunks(start_page, end_page)
+            
+            if len(page_chunks) == 1:
+                # Process all pages at once
+                return self.generate_chunk_notes(pdf_file, start_page, end_page, 1, 1)
+            else:
+                # Process in chunks and combine
+                chunk_summaries = []
+                
+                for i, (chunk_start, chunk_end) in enumerate(page_chunks):
+                    summary = self.generate_chunk_notes(pdf_file, chunk_start, chunk_end, i + 1, len(page_chunks))
+                    chunk_summaries.append(summary)
+                    
+                    # Add rate limiting between chunks
+                    if i < len(page_chunks) - 1:  # Don't sleep after the last chunk
+                        time.sleep(random.uniform(2, 4))
+                
+                # Combine all chunk summaries
+                final_notes = self.combine_chunk_summaries(chunk_summaries, start_page, end_page)
+                return final_notes
+            
+        except Exception as e:
+            self.print_progress(f"Error generating notes: {e}")
+            return f"Error generating notes: {str(e)}"
+            
+    def generate_chunk_notes(self, pdf_file, chunk_start, chunk_end, chunk_index, total_chunks):
+        """Generate notes for a specific page chunk."""
+        try:
+            # Create the prompt for chunk note generation
+            prompt = f"""This is a part of my note (PDF) from page {chunk_start} to {chunk_end}. I will provide the full note step by step. I need you to explain the note in සිංහල language. Explain all the details in sinhala. Use Markdown formatting."""
 
-            self.print_progress(f"Generating notes for pages {start_page}-{end_page}")
+            self.print_progress(f"Generating notes for pages {chunk_start}-{chunk_end} (chunk {chunk_index}/{total_chunks})")
             
             response = self.client.models.generate_content(
                 model="models/gemini-2.5-flash",
                 contents=[pdf_file, prompt]
             )
             
-            self.print_progress("Notes generated successfully")
+            self.print_progress(f"Chunk {chunk_index}/{total_chunks} processed successfully")
             return response.text
             
         except Exception as e:
-            self.print_progress(f"Error generating notes: {e}")
-            return f"Error generating notes: {str(e)}"
+            self.print_progress(f"Error processing chunk {chunk_index} (pages {chunk_start}-{chunk_end}): {e}")
+            # Wait a bit longer and retry once
+            time.sleep(5)
+            try:
+                response = self.client.models.generate_content(
+                    model="models/gemini-2.5-flash",
+                    contents=[pdf_file, prompt]
+                )
+                return response.text
+            except Exception as e2:
+                self.print_progress(f"Retry failed for chunk {chunk_index}: {e2}")
+                return f"[Error processing pages {chunk_start}-{chunk_end}: {str(e2)}]"
+    
+    def combine_chunk_summaries(self, chunk_summaries: list, start_page: int, end_page: int):
+        """Combine individual chunk summaries into a final comprehensive note."""
+        combined_text = "\n\n---\n\n".join(chunk_summaries)
+        
+        prompt = f"""These are several parts of my note from a PDF covering pages {start_page}-{end_page}. Please combine them into a single, coherent note in සිංහල. Explain all the details and use Markdown formatting.
+
+{combined_text}"""
+
+        try:
+            self.print_progress("Combining and organizing all page chunks...")
+            time.sleep(2)  # Rate limiting
+            
+            response = self.client.models.generate_content(
+                model="models/gemini-2.5-flash",
+                contents=prompt
+            )
+            
+            self.print_progress("Successfully combined all chunks into final notes")
+            return response.text
+            
+        except Exception as e:
+            self.print_progress(f"Error combining chunk summaries: {e}")
+            # Return the concatenated version if combination fails
+            return combined_text
             
     def save_notes(self, notes: str, pdf_path: str, start_page: int, end_page: int):
         """Save the generated notes to a markdown file."""
@@ -265,14 +358,23 @@ def main():
     START_PAGE = pdf_config["start_page"]
     END_PAGE = pdf_config["end_page"]
     
+    # Optional chunking configuration
+    CHUNK_PAGES = pdf_config.get("chunk_pages", 3)
+    OVERLAP_PAGES = pdf_config.get("overlap_pages", 1)
+    
     print("=== PDF Notes Generator ===")
     print("This tool generates detailed study notes in Sinhala from PDF files.")
     print(f"Processing: {PDF_FILE}")
     print(f"Pages: {START_PAGE}-{END_PAGE}")
+    print(f"Chunking: {CHUNK_PAGES} pages per chunk, {OVERLAP_PAGES} pages overlap")
     print()
     
     # Create generator and process PDF
-    generator = SimplePDFNotesGenerator(api_key=API_KEY)
+    generator = SimplePDFNotesGenerator(
+        api_key=API_KEY, 
+        chunk_pages=CHUNK_PAGES, 
+        overlap_pages=OVERLAP_PAGES
+    )
     result = generator.generate_notes(PDF_FILE, START_PAGE, END_PAGE)
     
     if result:
