@@ -46,7 +46,7 @@ class SimplePDFNotesGenerator:
         """Generate notes from the uploaded PDF."""
         try:
             # Create the prompt for note generation
-            prompt = f"""This is a part of my note (PDF). I will provide the full note step by step. I need you to explain the note in සිංහල language. First explain {start_page}-{end_page} slides - all the details in sinhala. Use Markdown formatting."""
+            prompt = f"""This is a part of my lecture note (PDF). I will provide the full lecture note step by step. I need you to explain it simply in සිංහල language (Like explaining to a friend). First explain only {start_page}-{end_page} slides - with all the details in sinhala. (I have to actually learn in english. so add important points in sinhala and english both.) Use Markdown formatting."""
 
             self.print_progress(f"Generating notes for pages {start_page}-{end_page}")
             
