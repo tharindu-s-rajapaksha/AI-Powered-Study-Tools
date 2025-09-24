@@ -44,7 +44,7 @@ class SimplePDFNotesGenerator:
         try:
             # Adjust page numbers (subtract 1 for before, add 1 for after)
             extract_start = max(1, start_page - 1)
-            extract_end = end_page + 1
+            extract_end = end_page # end_page + 1
             
             self.print_progress(f"Extracting pages {extract_start}-{extract_end} from PDF")
             
@@ -148,6 +148,7 @@ class SimplePDFNotesGenerator:
             
             # Clean up the markdown formatting
             notes_text = re.sub(r'(:\n\*)', ':\n\n*', notes_text)
+            notes_text = re.sub(r'---\n\n.*\n\n---', '---', notes_text)
             
             # Convert to HTML
             html_content = markdown.markdown(notes_text)
