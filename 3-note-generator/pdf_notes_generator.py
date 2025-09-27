@@ -99,7 +99,7 @@ class SimplePDFNotesGenerator:
         """Generate notes from the uploaded PDF."""
         try:
             # Create the prompt for note generation
-            prompt = f"""This is a part of my lecture note (PDF). I will provide the full lecture note step by step. I need you to explain in සිංහල language (Like explaining to a friend). First explain only {start_page}-{end_page} slides - with all the details in sinhala. (I have to actually learn in english. so add important points in sinhala and english both.) Use Markdown formatting."""
+            prompt = f"""This is a part of my lecture note (PDF). I will provide the full lecture note step by step. I need you to explain it simply in සිංහල language (Like explaining to a friend). First I will give you {end_page-start_page+2} slides. but you need to explain only the last {end_page-start_page+1} slides - with all the exact details in sinhala. (I have to actually learn in english. so add important points in sinhala and english both.) Use Markdown formatting."""
 
             self.print_progress(f"Generating notes for pages {start_page}-{end_page}")
             
@@ -148,6 +148,7 @@ class SimplePDFNotesGenerator:
             
             # Clean up the markdown formatting
             notes_text = re.sub(r'(:\n\*)', ':\n\n*', notes_text)
+            notes_text = re.sub(r'(.\n\*)', '.\n\n*', notes_text)
             notes_text = re.sub(r'---\n\n.*\n\n---', '---', notes_text)
             
             # Convert to HTML
