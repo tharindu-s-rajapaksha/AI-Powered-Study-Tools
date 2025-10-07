@@ -4,6 +4,7 @@ import time
 import pathlib
 import markdown
 import json
+import platform
 from datetime import datetime
 from google import genai
 from dotenv import load_dotenv
@@ -12,6 +13,78 @@ from PyPDF2 import PdfReader, PdfWriter
 # Load environment variables from .env file
 load_dotenv()
 
+class SoundPlayer:
+    """Handle sound playback across different platforms."""
+    
+    def __init__(self):
+        self.system = platform.system()
+        
+    def play_sound(self, sound_type: str):
+        """Play system sound based on event type."""
+        try:
+            if self.system == "Linux":
+                self._play_linux_sound(sound_type)
+            elif self.system == "Windows":
+                self._play_windows_sound(sound_type)
+            elif self.system == "Darwin":  # macOS
+                self._play_macos_sound(sound_type)
+        except Exception as e:
+            print(f"Could not play sound: {e}")
+    
+    def _play_linux_sound(self, sound_type: str):
+        """Play sound on Linux using paplay or beep."""
+        sounds = {
+            "start": "message",
+            "step": "message-new-instant",
+            "complete": "complete",
+            "error": "dialog-error"
+        }
+        
+        sound_name = sounds.get(sound_type, "message")
+        
+        # Try paplay first (works with PulseAudio)
+        try:
+            os.system(f"paplay /usr/share/sounds/freedesktop/stereo/{sound_name}.oga 2>/dev/null &")
+        except:
+            # Fallback to beep
+            try:
+                frequencies = {
+                    "start": "800 -l 100",
+                    "step": "600 -l 80",
+                    "complete": "1000 -l 150",
+                    "error": "400 -l 200"
+                }
+                freq = frequencies.get(sound_type, "600 -l 80")
+                os.system(f"beep -f {freq} 2>/dev/null &")
+            except:
+                pass
+    
+    def _play_windows_sound(self, sound_type: str):
+        """Play sound on Windows."""
+        import winsound
+        
+        sounds = {
+            "start": (800, 100),
+            "step": (600, 80),
+            "complete": (1000, 150),
+            "error": (400, 200)
+        }
+        
+        freq, duration = sounds.get(sound_type, (600, 80))
+        winsound.Beep(freq, duration)
+    
+    def _play_macos_sound(self, sound_type: str):
+        """Play sound on macOS."""
+        sounds = {
+            "start": "Glass",
+            "step": "Pop",
+            "complete": "Hero",
+            "error": "Basso"
+        }
+        
+        sound_name = sounds.get(sound_type, "Pop")
+        os.system(f"afplay /System/Library/Sounds/{sound_name}.aiff &")
+
 class SimplePDFNotesGenerator:
     def __init__(self, api_key: str):
         self.api_key = api_key
@@ -19,10 +92,16 @@ class SimplePDFNotesGenerator:
         # Configure the client
         self.client = genai.Client(api_key=api_key)
         
-    def print_progress(self, message: str):
-        """Print a progress message with timestamp."""
+        # Initialize sound player
+        self.sound_player = SoundPlayer()
+        
+    def print_progress(self, message: str, sound_type: str = None):
+        """Print a progress message with timestamp and optional sound."""
         timestamp = datetime.now().strftime("%H:%M:%S")
         print(f"[{timestamp}] {message}")
+        
+        if sound_type:
+            self.sound_player.play_sound(sound_type)
         
     def create_output_folder(self, pdf_path: str, start_page: int, end_page: int):
         """Create output folder based on page range."""
@@ -33,9 +112,9 @@ class SimplePDFNotesGenerator:
         
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
-            self.print_progress(f"Created output folder: {output_folder}")
+            self.print_progress(f"Created output folder: {output_folder}", "step")
         else:
-            self.print_progress(f"Using existing folder: {output_folder}")
+            self.print_progress(f"Using existing folder: {output_folder}", "step")
             
         return output_folder
     
@@ -70,11 +149,11 @@ class SimplePDFNotesGenerator:
             with open(extracted_pdf_path, 'wb') as output_file:
                 writer.write(output_file)
             
-            self.print_progress(f"Extracted PDF saved to: {extracted_pdf_path}")
+            self.print_progress(f"Extracted PDF saved to: {extracted_pdf_path}", "step")
             return extracted_pdf_path
             
         except Exception as e:
-            self.print_progress(f"Error extracting PDF pages: {e}")
+            self.print_progress(f"Error extracting PDF pages: {e}", "error")
             raise
 
             
@@ -86,20 +165,28 @@ class SimplePDFNotesGenerator:
             # Convert path to pathlib.Path and upload the PDF file
             file_path = pathlib.Path(pdf_path)
             pdf_file = self.client.files.upload(file=file_path)
-            self.print_progress(f"PDF uploaded successfully")
+            self.print_progress(f"PDF uploaded successfully", "step")
                 
             self.print_progress("PDF processed successfully and ready for analysis")
             return pdf_file
             
         except Exception as e:
-            self.print_progress(f"Error uploading PDF: {e}")
+            self.print_progress(f"Error uploading PDF: {e}", "error")
             raise
             
     def generate_notes_from_pdf(self, pdf_file, start_page, end_page):
         """Generate notes from the uploaded PDF."""
         try:
             # Create the prompt for note generation
-            prompt = f"""This is a part of my lecture note (PDF). I will provide the full lecture note step by step. I need you to explain it simply in සිංහල language (Like explaining to a friend). First I will give you {end_page-start_page+2} slides. but you need to explain only the last {end_page-start_page+1} slides - with all the exact details in sinhala. (I have to actually learn in english. so add important points in sinhala and english both.) Use Markdown formatting."""
+            prompt = f"""
+This is a part of my lecture note (PDF). 
+I will provide the full lecture note step by step. 
+I need you to explain it simply in සිංහල language (Like explaining to a friend). 
+First I will give you {end_page-start_page+2} slides. 
+But you need to explain only the last {end_page-start_page+1} slides - with all the exact details in sinhala.
+Skip explaining the first slide.
+(I have to actually learn in english. so add important points in sinhala and english both.) 
+Use Markdown formatting."""
 
             self.print_progress(f"Generating notes for pages {start_page}-{end_page}")
             
@@ -108,11 +195,11 @@ class SimplePDFNotesGenerator:
                 contents=[pdf_file, prompt]
             )
             
-            self.print_progress("Notes generated successfully")
+            self.print_progress("Notes generated successfully", "step")
             return response.text
             
         except Exception as e:
-            self.print_progress(f"Error generating notes: {e}")
+            self.print_progress(f"Error generating notes: {e}", "error")
             return f"Error generating notes: {str(e)}"
             
     def save_notes(self, notes: str, pdf_path: str, start_page: int, end_page: int, output_folder: str):
@@ -132,10 +219,10 @@ class SimplePDFNotesGenerator:
                 file.write("---\n\n")
                 file.write(notes)
                 
-            self.print_progress("Notes saved successfully")
+            self.print_progress("Notes saved successfully", "step")
             return output_path
         except Exception as e:
-            self.print_progress(f"Error saving notes: {e}")
+            self.print_progress(f"Error saving notes: {e}", "error")
             raise
             
     def convert_to_html(self, notes_file: str):
@@ -247,11 +334,11 @@ class SimplePDFNotesGenerator:
             with open(output_html, "w", encoding='utf-8') as file:
                 file.write(styled_html)
                 
-            self.print_progress(f"HTML notes saved to {output_html}")
+            self.print_progress(f"HTML notes saved to {output_html}", "step")
             return output_html
             
         except Exception as e:
-            self.print_progress(f"Error creating HTML: {e}")
+            self.print_progress(f"Error creating HTML: {e}", "error")
             return None
             
     def cleanup_uploaded_file(self, pdf_file):
@@ -264,7 +351,7 @@ class SimplePDFNotesGenerator:
             
     def generate_notes(self, pdf_path: str, start_page: int, end_page: int):
         """Main method to generate notes from PDF."""
-        self.print_progress("Starting PDF note generation process...")
+        self.print_progress("Starting PDF note generation process...", "start")
         start_time = time.time()
         
         pdf_file = None
@@ -292,7 +379,7 @@ class SimplePDFNotesGenerator:
             html_file = self.convert_to_html(notes_file)
             
             end_time = time.time()
-            self.print_progress(f"Process completed successfully in {(end_time - start_time) / 60:.1f} minutes!")
+            self.print_progress(f"Process completed successfully in {(end_time - start_time) / 60:.1f} minutes!", "complete")
             self.print_progress(f"Notes saved to: {notes_file}")
             if html_file:
                 self.print_progress(f"HTML version saved to: {html_file}")
@@ -300,7 +387,7 @@ class SimplePDFNotesGenerator:
             return html_file if html_file else notes_file
             
         except Exception as e:
-            self.print_progress(f"Process failed: {e}")
+            self.print_progress(f"Process failed: {e}", "error")
             return None
             
         finally:
