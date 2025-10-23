@@ -13,6 +13,9 @@ from PyPDF2 import PdfReader, PdfWriter
 # Load environment variables from .env file
 load_dotenv()
 
+# Gemini LLM model name
+LLM_MODEL = "models/gemini-2.5-flash"
+
 class SoundPlayer:
     """Handle sound playback across different platforms."""
     
@@ -122,7 +125,8 @@ class SimplePDFNotesGenerator:
         """Extract specified pages from PDF and save to output folder."""
         try:
             # Adjust page numbers (subtract 1 for before, add 1 for after)
-            extract_start = max(1, start_page - 1)
+            # extract_start = max(1, start_page - 1)
+            extract_start = start_page
             extract_end = end_page # end_page + 1
             
             self.print_progress(f"Extracting pages {extract_start}-{extract_end} from PDF")
@@ -174,24 +178,32 @@ class SimplePDFNotesGenerator:
             self.print_progress(f"Error uploading PDF: {e}", "error")
             raise
             
-    def generate_notes_from_pdf(self, pdf_file, start_page, end_page):
+    def generate_notes_from_pdf(self, pdf_file, start_page, end_page, summary: str = ""):
         """Generate notes from the uploaded PDF."""
         try:
-            # Create the prompt for note generation
+            # Create the prompt for note generation with summary context
             prompt = f"""
-This is a part of my lecture note (PDF). 
-I will provide the full lecture note step by step. 
+CONTEXT - Full Lecture Note Summary:
+{summary}
+
+---
+
+TASK:
+This is a part of my note (PDF). 
+I will provide the full note part by part. 
 I need you to explain it simply in සිංහල language (Like explaining to a friend). 
-First I will give you {end_page-start_page+2} slides. 
-But you need to explain only the last {end_page-start_page+1} slides - with all the exact details in sinhala.
-Skip explaining the first slide.
+First I will give you {end_page-start_page+1} pages part. 
+(Sometimes the 2 pages may include many lecture slides. If so, organize them in a proper flow.)
+You need to explain them with all the exact details in sinhala.
 (I have to actually learn in english. so add important points in sinhala and english both.) 
+
+Use the summary above to understand how this section fits into the overall lecture content.
 Use Markdown formatting."""
 
             self.print_progress(f"Generating notes for pages {start_page}-{end_page}")
             
             response = self.client.models.generate_content(
-                model="models/gemini-2.5-flash",
+                model=LLM_MODEL,
                 contents=[pdf_file, prompt]
             )
             
@@ -341,6 +353,64 @@ Use Markdown formatting."""
             self.print_progress(f"Error creating HTML: {e}", "error")
             return None
             
+    def get_or_create_summary(self, pdf_path: str):
+        """Get existing summary or create a new one for the full PDF."""
+        pdf_dir = os.path.dirname(pdf_path)
+        base_name = os.path.splitext(os.path.basename(pdf_path))[0]
+        summary_file = os.path.join(pdf_dir, f"{base_name}_summary.txt")
+        
+        # Check if summary already exists
+        if os.path.exists(summary_file):
+            self.print_progress(f"Found existing summary: {summary_file}", "step")
+            with open(summary_file, "r", encoding='utf-8') as f:
+                return f.read()
+        
+        # Create new summary
+        self.print_progress("No existing summary found. Generating summary of full PDF...", "step")
+        
+        pdf_file = None
+        try:
+            # Upload the full PDF
+            pdf_file = self.upload_pdf_to_gemini(pdf_path)
+            
+            # Generate summary
+            summary_prompt = """
+Please provide a comprehensive summary of this entire PDF lecture note.
+Include:
+1. Main topics and concepts covered
+2. Key themes and their relationships
+3. Overall structure and flow of the content
+
+Keep the summary detailed enough to give context for explaining specific sections later.
+Write the summary in English."""
+
+            self.print_progress("Generating full PDF summary...")
+            
+            response = self.client.models.generate_content(
+                model=LLM_MODEL,
+                contents=[pdf_file, summary_prompt]
+            )
+            
+            summary = response.text
+            
+            # Save summary
+            with open(summary_file, "w", encoding='utf-8') as f:
+                f.write(f"Summary of {base_name}\n")
+                f.write(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+                f.write("="*80 + "\n\n")
+                f.write(summary)
+            
+            self.print_progress(f"Summary saved to: {summary_file}", "step")
+            return summary
+            
+        except Exception as e:
+            self.print_progress(f"Error generating summary: {e}", "error")
+            return ""
+            
+        finally:
+            if pdf_file:
+                self.cleanup_uploaded_file(pdf_file)
+    
     def cleanup_uploaded_file(self, pdf_file):
         """Clean up the uploaded file from Gemini."""
         try:
@@ -360,6 +430,9 @@ Use Markdown formatting."""
             if not os.path.exists(pdf_path):
                 raise FileNotFoundError(f"PDF file not found: {pdf_path}")
             
+            # Get or create summary of the full PDF
+            summary = self.get_or_create_summary(pdf_path)
+            
             # Create output folder
             output_folder = self.create_output_folder(pdf_path, start_page, end_page)
             
@@ -369,8 +442,8 @@ Use Markdown formatting."""
             # Upload extracted PDF to Gemini
             pdf_file = self.upload_pdf_to_gemini(extracted_pdf_path)
             
-            # Generate notes
-            notes = self.generate_notes_from_pdf(pdf_file, start_page, end_page)
+            # Generate notes with summary context
+            notes = self.generate_notes_from_pdf(pdf_file, start_page, end_page, summary)
             
             # Save notes
             notes_file = self.save_notes(notes, pdf_path, start_page, end_page, output_folder)
