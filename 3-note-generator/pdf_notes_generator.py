@@ -5,10 +5,12 @@ import pathlib
 import markdown
 import json
 import platform
+import base64
 from datetime import datetime
 from google import genai
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader, PdfWriter
+import fitz  # PyMuPDF
 
 # Load environment variables from .env file
 load_dotenv()
@@ -196,7 +198,17 @@ Use the summary above to understand how this section fits into the overall lectu
 (Sometimes a page may include many lecture slides. If so, organize them in a proper flow. Then, you need to explain them with all the exact details.)
 I have to actually learn in english. so add important points in sinhala and english both.
 
-Use Markdown formatting."""
+IMPORTANT: Structure your response by PAGES. Use this exact format for each page:
+
+---PAGE {start_page}---
+[Your explanation for page {start_page} here]
+
+---PAGE {start_page + 1}---
+[Your explanation for page {start_page + 1} here]
+
+And so on for each page. This is critical for proper formatting.
+
+Use Markdown formatting for the explanations."""
 
 # I need you to explain it simply in සිංහල language (Like explaining to a friend). 
 # (I have to actually learn in english. so add important points in sinhala and english both.) 
@@ -215,6 +227,76 @@ Use Markdown formatting."""
             self.print_progress(f"Error generating notes: {e}", "error")
             return f"Error generating notes: {str(e)}"
             
+    def convert_pdf_pages_to_images(self, extracted_pdf_path: str, output_folder: str):
+        """Convert PDF pages to images using PyMuPDF and return list of image paths."""
+        try:
+            self.print_progress("Converting PDF pages to images...")
+            
+            # Open PDF with PyMuPDF
+            pdf_document = fitz.open(extracted_pdf_path)
+            image_paths = []
+            
+            # Convert each page to image
+            for page_num in range(len(pdf_document)):
+                page = pdf_document[page_num]
+                
+                # Render page to image with 2x zoom for better quality (equivalent to ~200 DPI)
+                mat = fitz.Matrix(2.0, 2.0)
+                pix = page.get_pixmap(matrix=mat)
+                
+                # Save image
+                image_filename = f"page_{page_num + 1}.png"
+                image_path = os.path.join(output_folder, image_filename)
+                pix.save(image_path)
+                image_paths.append(image_path)
+            
+            pdf_document.close()
+            
+            self.print_progress(f"Converted {len(image_paths)} pages to images", "step")
+            return image_paths
+            
+        except Exception as e:
+            self.print_progress(f"Error converting PDF to images: {e}", "error")
+            return []
+    
+    def parse_notes_by_page(self, notes: str, start_page: int, end_page: int):
+        """Parse the AI-generated notes and split them by page markers."""
+        try:
+            # Split by page markers
+            page_sections = {}
+            
+            # Try to find page markers like "---PAGE X---"
+            page_pattern = r'---PAGE\s+(\d+)---\s*(.*?)(?=---PAGE\s+\d+---|$)'
+            matches = re.findall(page_pattern, notes, re.DOTALL)
+            
+            if matches:
+                self.print_progress(f"Found {len(matches)} page sections in notes")
+                for page_num_str, content in matches:
+                    page_num = int(page_num_str)
+                    page_sections[page_num] = content.strip()
+                    self.print_progress(f"  - Page {page_num}: {len(content.strip())} characters")
+            else:
+                # Fallback: if no page markers found, treat entire content as one section
+                self.print_progress("No page markers found, using entire content as fallback")
+                # Try to split content evenly across pages or put in first page
+                total_pages = end_page - start_page + 1
+                if total_pages == 1:
+                    page_sections[start_page] = notes
+                else:
+                    # Put all content in each page as fallback
+                    for page in range(start_page, end_page + 1):
+                        page_sections[page] = notes
+            
+            return page_sections
+            
+        except Exception as e:
+            self.print_progress(f"Error parsing notes by page: {e}", "error")
+            # Fallback: return all content for all pages
+            page_sections = {}
+            for page in range(start_page, end_page + 1):
+                page_sections[page] = notes
+            return page_sections
+    
     def save_notes(self, notes: str, pdf_path: str, start_page: int, end_page: int, output_folder: str):
         """Save the generated notes to a markdown file."""
         base_name = os.path.splitext(os.path.basename(pdf_path))[0]
@@ -238,21 +320,72 @@ Use Markdown formatting."""
             self.print_progress(f"Error saving notes: {e}", "error")
             raise
             
-    def convert_to_html(self, notes_file: str):
-        """Convert the markdown notes to styled HTML."""
+    def convert_to_html(self, notes_file: str, image_paths: list = None, start_page: int = 1, end_page: int = 1):
+        """Convert the markdown notes to styled HTML with interleaved PDF slide images."""
         self.print_progress("Converting notes to HTML...")
         
         try:
             with open(notes_file, "r", encoding='utf-8') as file:
                 notes_text = file.read()
             
-            # Clean up the markdown formatting
-            notes_text = re.sub(r'(:\n\*)', ':\n\n*', notes_text)
-            notes_text = re.sub(r'(.\n\*)', '.\n\n*', notes_text)
-            notes_text = re.sub(r'---\n\n.*\n\n---', '---', notes_text)
+            # Parse notes by page
+            page_sections = self.parse_notes_by_page(notes_text, start_page, end_page)
             
-            # Convert to HTML
-            html_content = markdown.markdown(notes_text)
+            # Build interleaved content (image -> explanation -> image -> explanation)
+            interleaved_html = ""
+            
+            if image_paths:
+                self.print_progress(f"Creating interleaved layout with {len(image_paths)} slides...")
+                
+                for i, img_path in enumerate(image_paths):
+                    page_num = start_page + i
+                    
+                    try:
+                        # Read image and convert to base64
+                        with open(img_path, "rb") as img_file:
+                            img_data = base64.b64encode(img_file.read()).decode()
+                        
+                        # Add slide image
+                        interleaved_html += f'''
+<div class="page-section">
+    <div class="slide-container">
+        <h3 class="slide-title">📄 Page {page_num}</h3>
+        <img src="data:image/png;base64,{img_data}" alt="PDF Slide {page_num}" class="pdf-slide">
+    </div>
+'''
+                        
+                        # Add explanation for this page
+                        page_content = page_sections.get(page_num, "")
+                        if page_content:
+                            # Clean up the markdown
+                            page_content = re.sub(r'(:\n\*)', ':\n\n*', page_content)
+                            page_content = re.sub(r'(.\n\*)', '.\n\n*', page_content)
+                            
+                            # Convert to HTML
+                            explanation_html = markdown.markdown(page_content)
+                            interleaved_html += f'''
+    <div class="explanation-container">
+        <h3 class="explanation-title">📝 Explanation</h3>
+        {explanation_html}
+    </div>
+'''
+                        else:
+                            interleaved_html += '''
+    <div class="explanation-container">
+        <p><em>No specific explanation generated for this page.</em></p>
+    </div>
+'''
+                        
+                        interleaved_html += '</div>\n'
+                        
+                    except Exception as e:
+                        self.print_progress(f"Warning: Could not process page {page_num}: {e}")
+            else:
+                # No images, just convert all notes to HTML
+                notes_text = re.sub(r'(:\n\*)', ':\n\n*', notes_text)
+                notes_text = re.sub(r'(.\n\*)', '.\n\n*', notes_text)
+                notes_text = re.sub(r'---\n\n.*\n\n---', '---', notes_text)
+                interleaved_html = markdown.markdown(notes_text)
             
             # Add styling
             styled_html = f"""
@@ -267,7 +400,7 @@ Use Markdown formatting."""
             line-height: 1.6;
             margin: 0;
             padding: 40px;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background-color: #f8f9fa;
             color: #333;
@@ -277,6 +410,50 @@ Use Markdown formatting."""
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }}
+        .page-section {{
+            margin-bottom: 50px;
+            padding-bottom: 40px;
+            border-bottom: 3px solid #3498db;
+        }}
+        .page-section:last-of-type {{
+            border-bottom: none;
+        }}
+        .slide-container {{
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }}
+        .slide-title {{
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 8px;
+        }}
+        .pdf-slide {{
+            width: 80%;
+            height: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: block;
+            margin: 0 auto;
+        }}
+        .explanation-container {{
+            padding: 25px;
+            background-color: #ffffff;
+            border-left: 4px solid #3498db;
+            margin-top: 20px;
+        }}
+        .explanation-title {{
+            color: #34495e;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.2em;
         }}
         h1 {{
             color: #2c3e50;
@@ -293,6 +470,11 @@ Use Markdown formatting."""
             color: #7f8c8d;
             margin-top: 25px;
             margin-bottom: 10px;
+        }}
+        h4 {{
+            color: #95a5a6;
+            margin-top: 20px;
+            margin-bottom: 8px;
         }}
         p {{
             margin-bottom: 15px;
@@ -334,7 +516,8 @@ Use Markdown formatting."""
 </head>
 <body>
     <div class="container">
-        {html_content}
+        <h1>📚 Study Notes - Pages {start_page} to {end_page}</h1>
+        {interleaved_html}
         <div class="timestamp">
             Generated on {datetime.now().strftime("%B %d, %Y at %H:%M:%S")}
         </div>
@@ -440,6 +623,9 @@ Write the summary in English."""
             # Extract pages from PDF
             extracted_pdf_path = self.extract_pdf_pages(pdf_path, start_page, end_page, output_folder)
             
+            # Convert PDF pages to images
+            image_paths = self.convert_pdf_pages_to_images(extracted_pdf_path, output_folder)
+            
             # Upload extracted PDF to Gemini
             pdf_file = self.upload_pdf_to_gemini(extracted_pdf_path)
             
@@ -449,8 +635,8 @@ Write the summary in English."""
             # Save notes
             notes_file = self.save_notes(notes, pdf_path, start_page, end_page, output_folder)
             
-            # Convert to HTML
-            html_file = self.convert_to_html(notes_file)
+            # Convert to HTML with embedded images and page info
+            html_file = self.convert_to_html(notes_file, image_paths, start_page, end_page)
             
             end_time = time.time()
             self.print_progress(f"Process completed successfully in {(end_time - start_time) / 60:.1f} minutes!", "complete")

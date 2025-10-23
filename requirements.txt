@@ -15,6 +15,7 @@ markdown
 
 # PDF Processing
 PyPDF2
+PyMuPDF
 
 # Utilities
 python-dotenv
