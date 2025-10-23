@@ -189,16 +189,17 @@ CONTEXT - Full Lecture Note Summary:
 ---
 
 TASK:
-This is a part of my note (PDF). 
-I will provide the full note part by part. 
-I need you to explain it simply in සිංහල language (Like explaining to a friend). 
-First I will give you {end_page-start_page+1} pages part. 
-(Sometimes the 2 pages may include many lecture slides. If so, organize them in a proper flow.)
-You need to explain them with all the exact details in sinhala.
-(I have to actually learn in english. so add important points in sinhala and english both.) 
-
+Above is the summary of the full lecture note.
+I have provided {end_page-start_page+1} pages part of my note (PDF). I will provide the full note part by part like this.
+I need you to explain the provided pdf pages simply in සිංහල language (Like explaining to a friend). 
 Use the summary above to understand how this section fits into the overall lecture content.
+(Sometimes a page may include many lecture slides. If so, organize them in a proper flow. Then, you need to explain them with all the exact details.)
+I have to actually learn in english. so add important points in sinhala and english both.
+
 Use Markdown formatting."""
+
+# I need you to explain it simply in සිංහල language (Like explaining to a friend). 
+# (I have to actually learn in english. so add important points in sinhala and english both.) 
 
             self.print_progress(f"Generating notes for pages {start_page}-{end_page}")
             
