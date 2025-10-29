@@ -92,15 +92,17 @@ class SimpleNoteGenerator:
 
 {chunk}
 
-Instructions:
-1. Extract all important concepts, definitions, and explanations
-2. Maintain the logical flow and structure of the content
-3. Include specific examples and details mentioned
-4. Highlight key points that would be important for exams
+CRITICAL Instructions:
+1. Maintain the EXACT ORDER of topics as they appear in the transcription - do not rearrange or reorder
+2. Extract and include ALL concepts, definitions, explanations, and examples mentioned
+3. Preserve the original logical flow and sequence of the lecture content
+4. Include every specific detail, example, and explanation from the transcription
 5. Use clear, organized formatting with bullet points and sections
-6. Don't summarize too heavily - preserve important details
+6. Do NOT skip, omit, or summarize any content - preserve everything
+7. Highlight key points that would be important for exams
+8. Keep the same teaching progression and order as the original lecture
 
-DETAILED NOTES:"""
+DETAILED NOTES (maintaining exact order):"""
 
         try:
             self.print_progress(f"Processing chunk {chunk_index + 1}/{total_chunks}")
@@ -130,16 +132,19 @@ DETAILED NOTES:"""
 
 {combined_text}
 
-Instructions:
-1. Organize all content into a logical, coherent structure
-2. Remove any redundancy while preserving all important information
-3. Create clear sections and subsections with appropriate headings
-4. Ensure smooth transitions between topics
-5. Highlight the most important concepts for exam preparation
-6. Maintain all specific examples, definitions, and detailed explanations
-7. Use markdown formatting for better readability
+CRITICAL Instructions:
+1. Preserve the EXACT ORDER of all topics and concepts as they appear in the notes above
+2. Do NOT rearrange, reorganize, or change the sequence of topics
+3. Include ALL content from every section - nothing should be omitted
+4. Remove redundancy ONLY if the exact same information is repeated, but keep the order
+5. Create clear sections and subsections with appropriate headings while maintaining sequence
+6. Ensure smooth transitions between topics without changing their order
+7. Highlight the most important concepts for exam preparation
+8. Maintain all specific examples, definitions, and detailed explanations in their original positions
+9. Use markdown formatting for better readability
+10. The final note must follow the same teaching progression as the original lecture
 
-Create a complete, exam-ready study note that covers all topics thoroughly:"""
+Create a complete, exam-ready study note that maintains the exact order and includes all content:"""
 
         try:
             self.print_progress("Combining and organizing all sections...")
@@ -169,15 +174,18 @@ Create a complete, exam-ready study note that covers all topics thoroughly:"""
 
 {transcript_text}
 
-Instructions:
-1. Extract all important concepts, definitions, and explanations
-2. Organize content with clear headings and structure
-3. Include specific examples and details mentioned
-4. Highlight key points important for exams
-5. Use markdown formatting for better readability
-6. Preserve important details - don't over-summarize
+CRITICAL Instructions:
+1. Maintain the EXACT ORDER of topics as they appear in the transcription - do not rearrange
+2. Extract and include ALL concepts, definitions, explanations, and examples mentioned
+3. Preserve the original sequence and flow of the lecture content
+4. Include every specific detail and explanation from the transcription
+5. Organize content with clear headings and structure while maintaining the original order
+6. Highlight key points important for exams
+7. Use markdown formatting for better readability
+8. Do NOT skip, omit, or reorder any content - preserve everything in sequence
+9. The note must follow the same teaching progression as the original lecture
 
-COMPREHENSIVE STUDY NOTES:"""
+COMPREHENSIVE STUDY NOTES (maintaining exact order and all content):"""
 
                 response = self.model.generate_content(prompt)
                 return response.text
