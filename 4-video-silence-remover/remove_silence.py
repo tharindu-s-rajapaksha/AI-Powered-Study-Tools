@@ -11,6 +11,7 @@ import json
 import logging
 import winsound
 from pathlib import Path
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -200,7 +201,11 @@ def main():
             create_output_directory(output_file)
             
             # Run jumpcutter
+            start_time = time.time()
             run_jumpcutter(input_file, output_file, JUMPCUTTER_PARAMS)
+            end_time = time.time()
+            duration = end_time - start_time
+            logger.info(f"Total processing time: {duration:.2f} seconds")
             
             # Sound notification - completion
             for freq in [480, 600, 720, 600, 480, 360]:
