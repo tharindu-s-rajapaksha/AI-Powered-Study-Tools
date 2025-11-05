@@ -1,48 +1,113 @@
 {
   "video_transcriber": {
-    "video_path": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp.mkv"
+    "video_path": "D:/Desktop/UNI/~ACA - L3S2/CM3530 - Research Methods/Recordings/2025-10-02_silence_removed.mp4"
   },
   "note_generator": {
-    "text_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp_transcription"
+    "text_file": "D:/Desktop/UNI/~ACA - L3S2/CM3530 - Research Methods/Recordings/2025-10-02_silence_removed_transcription.txt",
+    "video_path": "D:/Desktop/UNI/~ACA - L3S2/CM3530 - Research Methods/Recordings/2025-10-02_silence_removed.mp4"
   },
   "translate_sinhala_html": {
-    "input_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp_transcription_notes.html",
-    "output_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\translated_sinhala.html"
+    "input_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/2025-09-03 02-58-41-nlp_transcription_notes.html",
+    "output_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/translated_sinhala.html"
   },
   "translate_sinhala_md": {
-    "input_file": "D:\\Desktop\\Social Aspects of IT.md",
-    "output_file": "D:\\Desktop\\Social Aspects of IT - Sinhala.md"
+    "input_file": "D:/Desktop/Social Aspects of IT.md",
+    "output_file": "D:/Desktop/Social Aspects of IT - Sinhala.md"
   },
   "pdf_note_generator": {
-    "pdf_file": "/home/tharindu-sathsara/Desktop/IS4430 - Social Aspects of IT 1-10.pdf",
-    "start_page": 1,
-    "end_page": 4
+    "pdf_file": "D:/Desktop/UNI/~ACA - L3S2/CM3530 - Research Methods/Notes/Slides.pdf",
+    "start_page": 75,
+    "end_page": 79
+  },
+  "pdf_splitter": {
+    "input_pdf": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 2  Introduction to Data Warehousing and OLAP Technology (Combined Chapter 3 in Data Mining)/Chapter_2.pdf",
+    "rows": 3,
+    "cols": 2,
+    "output_dir": null,
+    "remove_empty": true,
+    "empty_threshold": 0.95
   },
   "html_comparison_viewer": {
-    "original_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\2025-09-03 02-58-41-nlp_transcription_notes.html",
-    "translated_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\translated_sinhala.html",
-    "output_file": "D:\\Desktop\\UNI\\~ACA - L3S1\\CM3620 - Natural Language Processing\\comparison_view.html"
+    "original_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/2025-09-03 02-58-41-nlp_transcription_notes.html",
+    "translated_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/translated_sinhala.html",
+    "output_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/comparison_view.html"
   },
   "video_silence_remover": [
     {
-      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_02.mp4",
-      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_02_silence_removed.mp4"
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 3  Data Preprocessing/Chapter 3 Part 4.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 3  Data Preprocessing/Chapter 3 Part 4_silence_removed.mp4"
     },
     {
-      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_03.mp4",
-      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_03_silence_removed.mp4"
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 3  Data Preprocessing/Chapter 3 Part 5.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 3  Data Preprocessing/Chapter 3 Part 5_silence_removed.mp4"
     },
     {
-      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_04.mp4",
-      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_04_silence_removed.mp4"
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 4 Data Cube Computation and Data Generalization/Chapter 4 Part 1 B21.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 4 Data Cube Computation and Data Generalization/Chapter 4 Part 1 B21_silence_removed.mp4"
     },
     {
-      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_05.mp4",
-      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_05_silence_removed.mp4"
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 4 Data Cube Computation and Data Generalization/Chapter 4 Part 2.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 4 Data Cube Computation and Data Generalization/Chapter 4 Part 2_silence_removed.mp4"
     },
     {
-      "input_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_06.mp4",
-      "output_file": "D:\\Desktop\\UNI\\~ACA - L3S2\\IS4430 - Social Aspects of IT\\Lecture_06_silence_removed.mp4"
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 4 Data Cube Computation and Data Generalization/Chapter 4 Part 3 B21.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 4 Data Cube Computation and Data Generalization/Chapter 4 Part 3 B21_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 5 Mining Frequent Patterns, Association and Correlations/Chapter 5 Part 1 B21.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 5 Mining Frequent Patterns, Association and Correlations/Chapter 5 Part 1 B21_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 5 Mining Frequent Patterns, Association and Correlations/Chapter 5 Part 2.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 5 Mining Frequent Patterns, Association and Correlations/Chapter 5 Part 2_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 5 Mining Frequent Patterns, Association and Correlations/Chapter 5 Part 3.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 5 Mining Frequent Patterns, Association and Correlations/Chapter 5 Part 3_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 5 Mining Frequent Patterns, Association and Correlations/Chapter 5 part 4.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 5 Mining Frequent Patterns, Association and Correlations/Chapter 5 part 4_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 6  Classification and Prediction/Chapter 6 Part 1.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 6  Classification and Prediction/Chapter 6 Part 1_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 6  Classification and Prediction/Chapter 6 Part 2.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 6  Classification and Prediction/Chapter 6 Part 2_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 6  Classification and Prediction/Chapter 6 Part 3.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 6  Classification and Prediction/Chapter 6 Part 3_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 6  Classification and Prediction/Chapter 6 Part 4.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 6  Classification and Prediction/Chapter 6 Part 4_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 7  Clustering/Clustering Part 1 Introduction.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 7  Clustering/Clustering Part 1 Introduction_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 7  Clustering/Clustering Part 2.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 7  Clustering/Clustering Part 2_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 7  Clustering/Clustering Part 3.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 7  Clustering/Clustering Part 3_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Data Warehousing Chapter 2 Logical Design Concepts/Dimensional modeling 1.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Data Warehousing Chapter 2 Logical Design Concepts/Dimensional modeling 1_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Data Warehousing Chapter 2 Logical Design Concepts/Dimensional modeling 2.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Data Warehousing Chapter 2 Logical Design Concepts/Dimensional modeling 2_silence_removed.mp4"
+    },
+    {
+      "input_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Data Warehousing Chapter 3  Dimensional Modeling/Physical Design.mp4",
+      "output_file": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Data Warehousing Chapter 3  Dimensional Modeling/Physical Design_silence_removed.mp4"
     }
   ]
 }

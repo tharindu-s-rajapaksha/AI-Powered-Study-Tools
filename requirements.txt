@@ -1,9 +1,9 @@
 # Core Transcription & Audio
 faster-whisper
 pyaudio
-numpy
-moviepy
-jumpcutter
+numpy==1.23.5
+moviepy==1.0.3
+jumpcutter==0.1.6
 numpy<1.24
 
 # Note Generation & Translation
@@ -16,6 +16,8 @@ markdown
 # PDF Processing
 PyPDF2
 PyMuPDF
+Pillow
+opencv-python
 
 # Utilities
 python-dotenv

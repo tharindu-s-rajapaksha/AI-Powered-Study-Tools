@@ -8,6 +8,7 @@ A collection of Python scripts designed to streamline academic workflows by leve
 -   **Real-Time Transcriber**: Capture and transcribe system audio or microphone input live.
 -   **AI Note Generator**: Convert a raw transcript into well-structured, summarized study notes in Markdown and HTML format using a Generative AI model.
 -   **HTML Translator & Viewer**: Translate the generated HTML notes into Sinhala and create a side-by-side comparison view to review the translation.
+-   **PDF Multi-Page Splitter**: Automatically split PDF pages containing multiple slides (2×3, 3×2 grids, etc.) into individual pages with empty page detection (95% blank removal).
 
 ---
 
@@ -141,3 +142,36 @@ This script captures audio directly from your microphone or system output (e.g.,
 
 ---
 *Disclaimer: This is an academic project. Do not commit sensitive information or API keys directly into version control. Ensure the `.env` file is listed in your `.gitignore`.*
+
+---
+
+## Additional Tools
+
+### PDF Multi-Page Splitter (5-pdf-page-splitter/)
+
+Split PDF pages containing multiple slides arranged in grids (like lecture handouts with 6 slides per page).
+
+**Features:**
+- Split PDFs with grid layouts (2×3, 3×2, 2×2, etc.)
+- Automatic empty page detection and removal (95% blank threshold)
+- Integrated with `inputs.json` configuration
+
+**Configuration in `inputs.json`:**
+```json
+"pdf_splitter": {
+  "input_pdf": "path/to/your/document.pdf",
+  "rows": 3,
+  "cols": 2,
+  "remove_empty": true,
+  "empty_threshold": 0.95
+}
+```
+
+**Usage:**
+```bash
+python 5-pdf-page-splitter/split_pdf.py
+```
+
+**See the full documentation in:** `5-pdf-page-splitter/README.md`
+
+---
