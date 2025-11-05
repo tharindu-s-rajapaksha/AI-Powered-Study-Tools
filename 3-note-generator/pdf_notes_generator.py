@@ -195,11 +195,11 @@ CONTEXT (for reference only):
 {summary}
 
 TASK
-- You are given PDF pages {start_page}–{end_page} from a lecture note.
-- Explain each page in Sinhala, in a friendly, conversational tone (like explaining to a friend over tea).
-- Be very detailed and thorough about what appears on the page, but keep language simple and easy to grasp.
-- Keep important technical terms in English where appropriate and add a brief Sinhala explanation in parentheses. Example: Volatility (විචල්‍යතාවය): price changes fast.
-- If a single PDF page contains multiple lecture slides, cover them one by one in a smooth flow (e.g., "Slide 1", "Slide 2").
+- You are given PDF pages {start_page}-{end_page} from a lecture note.
+- IMPORTANT: Explain everything VERY VERY SIMPLY in සිංහල language - like explaining to a friend who doesn't know anything about this topic. Use everyday simple Sinhala words that anyone can understand easily. Break down complex ideas into simple, easy-to-understand explanations. Make it as simple as possible - like teaching a beginner.
+- Write in a friendly, conversational සිංහල style - as if you're having a casual chat with a friend over tea. Use simple everyday language.
+- Include ALL the exact details but explain them in the SIMPLEST සිංහල possible - do not skip or omit anything, just make it easy to understand
+- Add important technical terms, concepts, and definitions in both SIMPLE Sinhala explanations AND English (since I need to learn in English)
 
 MARKDOWN RULES (very important)
 - Use headings, bullet lists, bold/italic, and short paragraphs.
