@@ -117,9 +117,11 @@ class SimplePDFNotesGenerator:
         
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
-            self.print_progress(f"Created output folder: {output_folder}", "step")
+            self.print_progress(f"Created output folder: {output_folder}")
+            self.sound_player.play_sound("step")
         else:
-            self.print_progress(f"Using existing folder: {output_folder}", "step")
+            self.print_progress(f"Using existing folder: {output_folder}")
+            self.sound_player.play_sound("step")
             
         return output_folder
     
@@ -155,11 +157,13 @@ class SimplePDFNotesGenerator:
             with open(extracted_pdf_path, 'wb') as output_file:
                 writer.write(output_file)
             
-            self.print_progress(f"Extracted PDF saved to: {extracted_pdf_path}", "step")
+            self.print_progress(f"Extracted PDF saved to: {extracted_pdf_path}")
+            self.sound_player.play_sound("step")
             return extracted_pdf_path
             
         except Exception as e:
-            self.print_progress(f"Error extracting PDF pages: {e}", "error")
+            self.print_progress(f"Error extracting PDF pages: {e}")
+            self.sound_player.play_sound("error")
             raise
 
             
@@ -171,13 +175,15 @@ class SimplePDFNotesGenerator:
             # Convert path to pathlib.Path and upload the PDF file
             file_path = pathlib.Path(pdf_path)
             pdf_file = self.client.files.upload(file=file_path)
-            self.print_progress(f"PDF uploaded successfully", "step")
+            self.print_progress(f"PDF uploaded successfully")
+            self.sound_player.play_sound("step")
                 
             self.print_progress("PDF processed successfully and ready for analysis")
             return pdf_file
             
         except Exception as e:
-            self.print_progress(f"Error uploading PDF: {e}", "error")
+            self.print_progress(f"Error uploading PDF: {e}")
+            self.sound_player.play_sound("error")
             raise
             
     def generate_notes_from_pdf(self, pdf_file, start_page, end_page, summary: str = ""):
@@ -185,33 +191,35 @@ class SimplePDFNotesGenerator:
         try:
             # Create the prompt for note generation with summary context
             prompt = f"""
-CONTEXT - Full Lecture Note Summary:
+CONTEXT (for reference only):
 {summary}
 
----
+TASK
+- You are given PDF pages {start_page}–{end_page} from a lecture note.
+- Explain each page in Sinhala, in a friendly, conversational tone (like explaining to a friend over tea).
+- Be very detailed and thorough about what appears on the page, but keep language simple and easy to grasp.
+- Keep important technical terms in English where appropriate and add a brief Sinhala explanation in parentheses. Example: Volatility (විචල්‍යතාවය): price changes fast.
+- If a single PDF page contains multiple lecture slides, cover them one by one in a smooth flow (e.g., "Slide 1", "Slide 2").
 
-TASK:
-Above is the summary of the full lecture note.
-I have provided {end_page-start_page+1} pages part of my note (PDF). I will provide the full note part by part like this.
-I need you to explain the provided pdf pages simply in සිංහල language (Like explaining to a friend). 
-Use the summary above to understand how this section fits into the overall lecture content.
-(Sometimes a page may include many lecture slides. If so, organize them in a proper flow. Then, you need to explain them with all the exact details.)
-I have to actually learn in english. so add important points in sinhala and english both.
+MARKDOWN RULES (very important)
+- Use headings, bullet lists, bold/italic, and short paragraphs.
+- Do NOT include tables anywhere in the output.
+- Keep clean Markdown only; preserve formatting quality.
 
-IMPORTANT: Structure your response by PAGES. Use this exact format for each page:
+OUTPUT FORMAT (strict)
+- Write the answer page by page using these page markers exactly:
 
 ---PAGE {start_page}---
-[Your explanation for page {start_page} here]
+[Very clear and detailed Sinhala explanation for page {start_page}]
 
 ---PAGE {start_page + 1}---
-[Your explanation for page {start_page + 1} here]
+[Very clear and detailed Sinhala explanation for page {start_page + 1}]
 
-And so on for each page. This is critical for proper formatting.
+- Continue the same pattern up to page {end_page}.
 
-Use Markdown formatting for the explanations."""
+"""
 
-# I need you to explain it simply in සිංහල language (Like explaining to a friend). 
-# (I have to actually learn in english. so add important points in sinhala and english both.) 
+# Prompt intentionally kept short and direct to avoid over-complication.
 
             self.print_progress(f"Generating notes for pages {start_page}-{end_page}")
             
@@ -220,11 +228,13 @@ Use Markdown formatting for the explanations."""
                 contents=[pdf_file, prompt]
             )
             
-            self.print_progress("Notes generated successfully", "step")
+            self.print_progress("Notes generated successfully")
+            self.sound_player.play_sound("step")
             return response.text
             
         except Exception as e:
-            self.print_progress(f"Error generating notes: {e}", "error")
+            self.print_progress(f"Error generating notes: {e}")
+            self.sound_player.play_sound("error")
             return f"Error generating notes: {str(e)}"
             
     def convert_pdf_pages_to_images(self, extracted_pdf_path: str, output_folder: str):
@@ -252,11 +262,13 @@ Use Markdown formatting for the explanations."""
             
             pdf_document.close()
             
-            self.print_progress(f"Converted {len(image_paths)} pages to images", "step")
+            self.print_progress(f"Converted {len(image_paths)} pages to images")
+            self.sound_player.play_sound("step")
             return image_paths
             
         except Exception as e:
-            self.print_progress(f"Error converting PDF to images: {e}", "error")
+            self.print_progress(f"Error converting PDF to images: {e}")
+            self.sound_player.play_sound("error")
             return []
     
     def parse_notes_by_page(self, notes: str, start_page: int, end_page: int):
@@ -302,6 +314,9 @@ Use Markdown formatting for the explanations."""
         base_name = os.path.splitext(os.path.basename(pdf_path))[0]
         output_file = f"{base_name}_pages_{start_page}-{end_page}_notes.md"
         
+        # Ensure output folder exists
+        os.makedirs(output_folder, exist_ok=True)
+        
         # Save in the output folder
         output_path = os.path.join(output_folder, output_file)
         
@@ -314,10 +329,12 @@ Use Markdown formatting for the explanations."""
                 file.write("---\n\n")
                 file.write(notes)
                 
-            self.print_progress("Notes saved successfully", "step")
+            self.print_progress("Notes saved successfully")
+            self.sound_player.play_sound("step")
             return output_path
         except Exception as e:
-            self.print_progress(f"Error saving notes: {e}", "error")
+            self.print_progress(f"Error saving notes: {e}")
+            self.sound_player.play_sound("error")
             raise
             
     def convert_to_html(self, notes_file: str, image_paths: list = None, start_page: int = 1, end_page: int = 1):
@@ -526,15 +543,25 @@ Use Markdown formatting for the explanations."""
 </html>"""
             
             # Save HTML in the same folder as the markdown file
-            output_html = notes_file.replace('.md', '.html')
+            # Use os.path to handle path properly
+            notes_dir = os.path.dirname(notes_file)
+            notes_basename = os.path.basename(notes_file)
+            html_basename = notes_basename.replace('.md', '.html')
+            output_html = os.path.join(notes_dir, html_basename)
+            
+            # Ensure directory exists
+            os.makedirs(notes_dir, exist_ok=True)
+            
             with open(output_html, "w", encoding='utf-8') as file:
                 file.write(styled_html)
                 
-            self.print_progress(f"HTML notes saved to {output_html}", "step")
+            self.print_progress(f"HTML notes saved to {output_html}")
+            self.sound_player.play_sound("step")
             return output_html
             
         except Exception as e:
-            self.print_progress(f"Error creating HTML: {e}", "error")
+            self.print_progress(f"Error creating HTML: {e}")
+            self.sound_player.play_sound("error")
             return None
             
     def get_or_create_summary(self, pdf_path: str):
@@ -545,12 +572,14 @@ Use Markdown formatting for the explanations."""
         
         # Check if summary already exists
         if os.path.exists(summary_file):
-            self.print_progress(f"Found existing summary: {summary_file}", "step")
+            self.print_progress(f"Found existing summary: {summary_file}")
+            self.sound_player.play_sound("step")
             with open(summary_file, "r", encoding='utf-8') as f:
                 return f.read()
         
         # Create new summary
-        self.print_progress("No existing summary found. Generating summary of full PDF...", "step")
+        self.print_progress("No existing summary found. Generating summary of full PDF...")
+        self.sound_player.play_sound("step")
         
         pdf_file = None
         try:
@@ -584,11 +613,13 @@ Write the summary in English."""
                 f.write("="*80 + "\n\n")
                 f.write(summary)
             
-            self.print_progress(f"Summary saved to: {summary_file}", "step")
+            self.print_progress(f"Summary saved to: {summary_file}")
+            self.sound_player.play_sound("step")
             return summary
             
         except Exception as e:
-            self.print_progress(f"Error generating summary: {e}", "error")
+            self.print_progress(f"Error generating summary: {e}")
+            self.sound_player.play_sound("error")
             return ""
             
         finally:
@@ -605,7 +636,8 @@ Write the summary in English."""
             
     def generate_notes(self, pdf_path: str, start_page: int, end_page: int):
         """Main method to generate notes from PDF."""
-        self.print_progress("Starting PDF note generation process...", "start")
+        self.print_progress("Starting PDF note generation process...")
+        self.sound_player.play_sound("start")
         start_time = time.time()
         
         pdf_file = None
@@ -639,7 +671,8 @@ Write the summary in English."""
             html_file = self.convert_to_html(notes_file, image_paths, start_page, end_page)
             
             end_time = time.time()
-            self.print_progress(f"Process completed successfully in {(end_time - start_time) / 60:.1f} minutes!", "complete")
+            self.print_progress(f"Process completed successfully in {(end_time - start_time) / 60:.1f} minutes!")
+            self.sound_player.play_sound("complete")
             self.print_progress(f"Notes saved to: {notes_file}")
             if html_file:
                 self.print_progress(f"HTML version saved to: {html_file}")
@@ -647,7 +680,8 @@ Write the summary in English."""
             return html_file if html_file else notes_file
             
         except Exception as e:
-            self.print_progress(f"Process failed: {e}", "error")
+            self.print_progress(f"Process failed: {e}")
+            self.sound_player.play_sound("error")
             return None
             
         finally:
