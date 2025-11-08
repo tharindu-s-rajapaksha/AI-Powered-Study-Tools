@@ -16,7 +16,7 @@ import fitz  # PyMuPDF
 load_dotenv()
 
 # Gemini LLM model name
-LLM_MODEL = "models/gemini-2.5-flash"
+LLM_MODEL = "models/gemini-2.5-pro"
 
 class SoundPlayer:
     """Handle sound playback across different platforms."""
@@ -72,7 +72,7 @@ class SoundPlayer:
             "start": (1000, 200),
             "step": (2000, 200),
             "complete": (5000, 1000),
-            "error": (100, 1000)
+            "error": (150, 1000)
         }
         
         freq, duration = sounds.get(sound_type, (600, 80))
@@ -199,19 +199,20 @@ TASK
 
 MARKDOWN RULES (very important)
 - Use headings, bullet lists, bold/italic, and short paragraphs.
-- Do NOT include tables anywhere in the output.
+- Do NOT include tables anywhere in the output. Instead use bullet points or numbered lists to present table information clearly.
 - Keep clean Markdown only; preserve formatting quality.
 
 OUTPUT FORMAT (strict)
-- Write the answer page by page using these page markers exactly:
+- IMPORTANT: Write the answer page by page using these page markers exactly:
 
 ---PAGE {start_page}---
-[Very clear and detailed Sinhala explanation for page {start_page}]
+[Very clear and detailed Sinhala explanation (All sections) for page {start_page}]
 
 ---PAGE {start_page + 1}---
-[Very clear and detailed Sinhala explanation for page {start_page + 1}]
+[Very clear and detailed Sinhala explanation (All sections) for page {start_page + 1}]
 
 - Continue the same pattern up to page {end_page}.
+- IMPORTANT: Do not mark pages from 1 to {end_page - start_page + 1} - Use the actual page numbers from the PDF ( {start_page} - {end_page} ).
 
 """
 
@@ -644,8 +645,12 @@ Write the summary in English."""
             
             # Adjust page numbers
             start_page = max(1, start_page)
-            end_page = min(end_page, PdfReader(pdf_path).getNumPages())
+            end_page = min(end_page, len(PdfReader(pdf_path).pages))
             
+            print(f"Processing...")
+            print(f"Pages: {start_page}-{end_page}")
+            print()
+
             # Get or create summary of the full PDF
             summary = self.get_or_create_summary(pdf_path)
             
@@ -660,6 +665,9 @@ Write the summary in English."""
             
             # Upload extracted PDF to Gemini
             pdf_file = self.upload_pdf_to_gemini(extracted_pdf_path)
+
+            # Override summary for specific page range
+            # summary = "Summary not provided. Because the full PDF has been given currently. So explain exact everything in the given PDF pages."
             
             # Generate notes with summary context
             notes = self.generate_notes_from_pdf(pdf_file, start_page, end_page, summary)
@@ -709,9 +717,6 @@ def main():
     
     print("=== PDF Notes Generator ===")
     print("This tool generates detailed study notes in Sinhala from PDF files.")
-    print(f"Processing: {PDF_FILE}")
-    print(f"Pages: {START_PAGE}-{END_PAGE}")
-    print()
     
     # Create generator and process PDF
     generator = SimplePDFNotesGenerator(api_key=API_KEY)
