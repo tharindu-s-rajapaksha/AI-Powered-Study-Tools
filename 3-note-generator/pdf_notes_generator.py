@@ -69,10 +69,10 @@ class SoundPlayer:
         import winsound
         
         sounds = {
-            "start": (800, 100),
-            "step": (600, 80),
-            "complete": (1000, 150),
-            "error": (400, 200)
+            "start": (1000, 200),
+            "step": (2000, 200),
+            "complete": (5000, 1000),
+            "error": (100, 1000)
         }
         
         freq, duration = sounds.get(sound_type, (600, 80))
@@ -124,14 +124,10 @@ class SimplePDFNotesGenerator:
             self.sound_player.play_sound("step")
             
         return output_folder
-    
-    def extract_pdf_pages(self, pdf_path: str, start_page: int, end_page: int, output_folder: str):
+
+    def extract_pdf_pages(self, pdf_path: str, extract_start: int, extract_end: int, output_folder: str):
         """Extract specified pages from PDF and save to output folder."""
         try:
-            # Adjust page numbers (subtract 1 for before, add 1 for after)
-            # extract_start = max(1, start_page - 1)
-            extract_start = start_page
-            extract_end = end_page # end_page + 1
             
             self.print_progress(f"Extracting pages {extract_start}-{extract_end} from PDF")
             
@@ -645,6 +641,10 @@ Write the summary in English."""
             # Check if PDF file exists
             if not os.path.exists(pdf_path):
                 raise FileNotFoundError(f"PDF file not found: {pdf_path}")
+            
+            # Adjust page numbers
+            start_page = max(1, start_page)
+            end_page = min(end_page, PdfReader(pdf_path).getNumPages())
             
             # Get or create summary of the full PDF
             summary = self.get_or_create_summary(pdf_path)

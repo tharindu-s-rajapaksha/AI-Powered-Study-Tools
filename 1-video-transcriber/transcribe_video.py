@@ -55,10 +55,10 @@ class SoundPlayer:
         import winsound
         
         sounds = {
-            "start": (800, 100),
-            "step": (600, 80),
-            "complete": (1000, 150),
-            "error": (400, 200)
+            "start": (1000, 200),
+            "step": (2000, 200),
+            "complete": (5000, 1000),
+            "error": (150, 1000)
         }
         
         freq, duration = sounds.get(sound_type, (600, 80))
