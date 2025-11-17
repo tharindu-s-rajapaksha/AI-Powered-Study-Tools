@@ -118,7 +118,11 @@ class VideoTranscriber:
             video = mp.VideoFileClip(video_path)
             audio = video.audio
 
-            temp_audio = "output/temp_audio.mp3"
+            # Create output directory if it doesn't exist
+            output_dir = "output"
+            os.makedirs(output_dir, exist_ok=True)
+            
+            temp_audio = os.path.join(output_dir, "temp_audio.mp3")
             audio.write_audiofile(temp_audio)
             self.sound_player.play_sound("step")
 
