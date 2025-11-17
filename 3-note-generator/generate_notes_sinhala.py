@@ -17,8 +17,8 @@ class SimpleNoteGenerator:
         self.text_file = text_file
         self.api_key = api_key
         self.model = None
-        self.chunk_size = 8000  # Characters per chunk
-        self.overlap = 500      # Overlap between chunks
+        self.chunk_size = 50000  # Characters per chunk
+        self.overlap = 1000      # Overlap between chunks
         
         # Configure the API
         genai.configure(api_key=api_key)
@@ -92,19 +92,22 @@ class SimpleNoteGenerator:
 
 {chunk}
 
-Instructions:
-1. Explain everything simply in සිංහල language (like explaining to a friend)
-2. Include all the exact details in Sinhala
-3. Add important points, concepts, and definitions in both Sinhala and English (since I need to learn in English)
-4. Extract all important concepts, definitions, and explanations
-5. Maintain the logical flow and structure of the content
-6. Include specific examples and details mentioned
-7. Highlight key points that would be important for exams
-8. Use clear, organized formatting with bullet points and sections
-9. Don't summarize too heavily - preserve important details
-10. Use Markdown formatting
+CRITICAL Instructions:
+1. Maintain the EXACT ORDER of topics as they appear in the transcription - do not rearrange or reorder
+2. **MOST IMPORTANT**: Explain everything VERY VERY SIMPLY in සිංහල language - like explaining to a friend who doesn't know anything about this topic. Use everyday simple Sinhala words that anyone can understand easily. Break down complex ideas into simple, easy-to-understand explanations. Make it as simple as possible - like teaching a beginner.
+3. Write in a friendly, conversational සිංහල style - as if you're having a casual chat with a friend over tea. Use simple everyday language.
+4. Include ALL the exact details but explain them in the SIMPLEST සිංහල possible - do not skip or omit anything, just make it easy to understand
+5. Add important technical terms, concepts, and definitions in both SIMPLE Sinhala explanations AND English (since I need to learn in English)
+6. Extract and include ALL concepts, definitions, explanations, and examples mentioned - but explain them in the simplest way possible
+7. Preserve the original logical flow and sequence of the lecture content
+8. Include every specific detail, example, and explanation from the transcription in SIMPLE, EASY language
+9. Highlight key points that would be important for exams
+10. Use clear, organized formatting with bullet points and sections
+11. Do NOT skip, omit, or summarize any content - preserve everything but make it very easy to understand
+12. Keep the same teaching progression and order as the original lecture
+13. Use Markdown formatting
 
-DETAILED NOTES (in සිංහල with important terms in English):"""
+DETAILED NOTES (in VERY SIMPLE, EASY සිංහල with important terms in English, maintaining exact order):"""
 
         try:
             self.print_progress(f"Processing chunk {chunk_index + 1}/{total_chunks}")
@@ -134,19 +137,23 @@ DETAILED NOTES (in සිංහල with important terms in English):"""
 
 {combined_text}
 
-Instructions:
-1. Write the final notes simply in සිංහල language (like explaining to a friend)
-2. Include all the exact details in Sinhala
-3. Keep important points, concepts, and definitions in both Sinhala and English
-4. Organize all content into a logical, coherent structure
-5. Remove any redundancy while preserving all important information
-6. Create clear sections and subsections with appropriate headings
-7. Ensure smooth transitions between topics
-8. Highlight the most important concepts for exam preparation
-9. Maintain all specific examples, definitions, and detailed explanations
-10. Use markdown formatting for better readability
+CRITICAL Instructions:
+1. Preserve the EXACT ORDER of all topics and concepts as they appear in the notes above
+2. Do NOT rearrange, reorganize, or change the sequence of topics
+3. **MOST IMPORTANT**: Write the final notes in VERY VERY SIMPLE සිංහල language - like explaining to a friend who doesn't know anything about this topic. Use everyday simple Sinhala words that anyone can understand easily. Make it as easy to understand as possible - like having a friendly conversation.
+4. Break down any complex explanations into the SIMPLEST සිංහල possible - use examples and analogies if needed
+5. Include ALL the exact details in SIMPLE Sinhala - nothing should be omitted, just make it easy to understand
+6. Keep important technical terms, concepts, and definitions in both SIMPLE Sinhala explanations AND English
+7. Remove redundancy ONLY if the exact same information is repeated, but keep the order
+8. Create clear sections and subsections with appropriate headings while maintaining sequence
+9. Ensure smooth transitions between topics without changing their order
+10. Highlight the most important concepts for exam preparation
+11. Maintain all specific examples, definitions, and detailed explanations in their original positions - but explain them simply
+12. Use markdown formatting for better readability
+13. The final note must follow the same teaching progression as the original lecture
+14. Use a friendly, conversational tone throughout - as if chatting with a friend over tea
 
-Create a complete, exam-ready study note in සිංහල that covers all topics thoroughly (with key terms in English):"""
+Create a complete, exam-ready study note in VERY SIMPLE සිංහල that maintains the exact order and includes all content (with key terms in English):"""
 
         try:
             self.print_progress("Combining and organizing all sections...")
@@ -176,18 +183,23 @@ Create a complete, exam-ready study note in සිංහල that covers all topi
 
 {transcript_text}
 
-Instructions:
-1. Explain everything simply in සිංහල language (like explaining to a friend)
-2. Include all the exact details in Sinhala
-3. Add important points, concepts, and definitions in both Sinhala and English (since I need to learn in English)
-4. Extract all important concepts, definitions, and explanations
-5. Organize content with clear headings and structure
-6. Include specific examples and details mentioned
-7. Highlight key points important for exams
-8. Use markdown formatting for better readability
-9. Preserve important details - don't over-summarize
+CRITICAL Instructions:
+1. Maintain the EXACT ORDER of topics as they appear in the transcription - do not rearrange
+2. **MOST IMPORTANT**: Explain everything VERY VERY SIMPLY in සිංහල language - like explaining to a friend who doesn't know anything about this topic. Use everyday simple Sinhala words that anyone can understand easily. Break down complex ideas into simple, easy-to-understand explanations. Make it as simple as possible - like teaching a complete beginner.
+3. Write in a friendly, conversational සිංහල style - as if you're having a casual chat with a friend over tea. Use simple everyday language.
+4. Include ALL the exact details but explain them in the SIMPLEST සිංහල possible - do not skip or omit anything, just make it easy to understand
+5. Add important technical terms, concepts, and definitions in both SIMPLE Sinhala explanations AND English (since I need to learn in English)
+6. Extract and include ALL concepts, definitions, explanations, and examples mentioned - but explain them in the simplest way possible
+7. Preserve the original sequence and flow of the lecture content
+8. Include every specific detail and explanation from the transcription in SIMPLE, EASY language
+9. Organize content with clear headings and structure while maintaining the original order
+10. Highlight key points important for exams
+11. Use markdown formatting for better readability
+12. Do NOT skip, omit, or reorder any content - preserve everything in sequence but make it very easy to understand
+13. The note must follow the same teaching progression as the original lecture
+14. Use a friendly, conversational tone throughout - as if chatting with a friend
 
-COMPREHENSIVE STUDY NOTES (in සිංහල with important terms in English):"""
+COMPREHENSIVE STUDY NOTES (in VERY SIMPLE, EASY සිංහල with important terms in English, maintaining exact order and all content):"""
 
                 response = self.model.generate_content(prompt)
                 return response.text
