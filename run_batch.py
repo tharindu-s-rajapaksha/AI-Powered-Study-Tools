@@ -26,6 +26,11 @@ TOOL_CONFIGS = {
         "name": "Note Generator",
         "config_key": "note_generator"
     },
+    "note_generator_sinhala": {
+        "script": "3-note-generator/generate_notes_sinhala.py",
+        "name": "Sinhala Note Generator",
+        "config_key": "note_generator"
+    },
     "translate_sinhala_html": {
         "script": "3-note-generator/translate_sinhala_html.py",
         "name": "Translate Sinhala HTML",
@@ -98,28 +103,25 @@ def main():
     # =========================================================================
     
     # Select which tool to run (use the key from TOOL_CONFIGS)
-    tool_key = "pdf_note_generator"  # Change this to run different tools
+    tool_key = "note_generator_sinhala"  # Change this to run different tools
     
     # Define your batch configurations here
     # For PDF Note Generator - specify page ranges:
-    batch_configs = [{
-        "start_page": start,
-        "end_page": end
-    } for start, end in [
-        (126, 130),
-        (131, 135),
-        (136, 140),
-        (141, 145),
-        (146, 150)
-    ]]
+    # batch_configs = [{
+    #     "start_page": start,
+    #     "end_page": end
+    # } for start, end in [
+    #     (196, 200),
+    #     (206, 210),
+    #     (216, 220),
+    # ]]
     
     # For other tools, specify field values for each batch:
     # Example for video transcriber:
-    # batch_configs = [
-    #     {"video_path": "path/to/video1.mp4"},
-    #     {"video_path": "path/to/video2.mp4"},
-    #     {"video_path": "path/to/video3.mp4"}
-    # ]
+    batch_configs = [
+        {"text_file": "D:/Desktop/UNI/~ACA - L3S2/CM3620 - Natural Language Processing/Lecture Recordings/2025-10-08 Lec_10_silence_removed_transcription.txt"},
+        {"text_file": "D:/Desktop/UNI/~ACA - L3S2/CM3620 - Natural Language Processing/Lecture Recordings/2025-10-15 Lec_12_silence_removed_transcription.txt"}
+    ]
     
     # Example for pdf_splitter:
     # batch_configs = [
