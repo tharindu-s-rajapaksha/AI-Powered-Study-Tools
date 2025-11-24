@@ -1,23 +1,21 @@
 # Core Transcription & Audio
-faster-whisper
-pyaudio
+faster-whisper==1.1.1
+PyAudio==0.2.14
 numpy==1.23.5
 moviepy==1.0.3
 jumpcutter==0.1.6
-numpy<1.24
 
 # Note Generation & Translation
-google-generativeai
-google-genai
-httpx
-pathlib
-markdown
+google-generativeai==0.8.3
+google-genai==1.32.0
+httpx==0.28.1
+Markdown==3.7
 
 # PDF Processing
-PyPDF2
-PyMuPDF
-Pillow
-opencv-python
+PyPDF2==3.0.1
+PyMuPDF==1.26.5
+Pillow==11.3.0
+opencv-python==4.12.0.88
 
 # Utilities
-python-dotenv
+python-dotenv==1.0.1
