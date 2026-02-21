@@ -177,7 +177,8 @@ class RealtimeTranscriber:
                     if not text:
                         continue
                     line = f"{text}"
-                    print(f"Transcription: {line}")
+                    print(line)
+                    # print(f"Transcription: {line}")
                     try:
                         with open(self.transcript_path, "a", encoding="utf-8") as f:
                             f.write(line + "\n")

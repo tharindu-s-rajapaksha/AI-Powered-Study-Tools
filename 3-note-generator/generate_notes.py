@@ -31,8 +31,8 @@ class SimpleNoteGenerator:
     def setup_model(self):
         """Initialize the Gemini model."""
         try:
-            self.model = genai.GenerativeModel('gemini-2.5-flash')
-            self.print_progress("Initialized Gemini 2.5 Flash model")
+            self.model = genai.GenerativeModel('gemini-flash-latest')
+            self.print_progress("Initialized Gemini Flash Latest model")
         except Exception as e:
             self.print_progress(f"Error setting up model: {e}")
             raise

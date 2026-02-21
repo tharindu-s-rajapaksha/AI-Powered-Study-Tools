@@ -12,7 +12,7 @@ class HTMLTranslator:
     def __init__(self, api_key: str):
         """Initialize the translator with Google API key."""
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel("gemini-2.5-flash")
+        self.model = genai.GenerativeModel("gemini-flash-latest")
         
         # Configuration for text chunking
         self.chunk_size = 2000

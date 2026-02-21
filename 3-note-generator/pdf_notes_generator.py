@@ -16,7 +16,11 @@ import fitz  # PyMuPDF
 load_dotenv()
 
 # Gemini LLM model name
-LLM_MODEL = "models/gemini-2.5-pro"
+LLM_MODEL = "gemini-flash-latest"
+
+# Define a global variable for language
+# LANGUAGE = "English"
+LANGUAGE = "සිංහල"
 
 class SoundPlayer:
     """Handle sound playback across different platforms."""
@@ -192,10 +196,10 @@ CONTEXT (for reference only):
 
 TASK
 - You are given PDF pages {start_page}-{end_page} from a lecture note.
-- IMPORTANT: Explain everything VERY VERY SIMPLY in සිංහල language - like explaining to a friend who doesn't know anything about this topic. Use everyday simple Sinhala words that anyone can understand easily. Break down complex ideas into simple, easy-to-understand explanations. Make it as simple as possible - like teaching a beginner.
-- Write in a friendly, conversational සිංහල style - as if you're having a casual chat with a friend over tea. Use simple everyday language.
-- Include ALL the exact details but explain them in the SIMPLEST සිංහල possible - do not skip or omit anything, just make it easy to understand
-- Add important technical terms, concepts, and definitions in both SIMPLE Sinhala explanations AND English (since I need to learn in English)
+- IMPORTANT: Explain everything VERY VERY SIMPLY in {LANGUAGE} language - like explaining to a friend who doesn't know anything about this topic. Use everyday simple {LANGUAGE} words that anyone can understand easily. Break down complex ideas into simple, easy-to-understand explanations. Make it as simple as possible - like teaching a beginner.
+- Write in a friendly, conversational {LANGUAGE} style - as if you're having a casual chat with a friend over tea. Use simple everyday language.
+- Include ALL the exact details but explain them in the SIMPLEST {LANGUAGE} possible - do not skip or omit anything, just make it easy to understand
+- Add important technical terms, concepts, and definitions in both SIMPLE {LANGUAGE} explanations AND English (since I need to learn in English)
 
 MARKDOWN RULES (very important)
 - Use headings, bullet lists, bold/italic, and short paragraphs.
@@ -206,10 +210,10 @@ OUTPUT FORMAT (strict)
 - IMPORTANT: Write the answer page by page using these page markers exactly:
 
 ---PAGE {start_page}---
-[Very clear and detailed Sinhala explanation (All sections) for page {start_page}]
+[Very clear and detailed {LANGUAGE} explanation (All sections) for page {start_page}]
 
 ---PAGE {start_page + 1}---
-[Very clear and detailed Sinhala explanation (All sections) for page {start_page + 1}]
+[Very clear and detailed {LANGUAGE} explanation (All sections) for page {start_page + 1}]
 
 - Continue the same pattern up to page {end_page}.
 - IMPORTANT: Do not mark pages from 1 to {end_page - start_page + 1} - Use the actual page numbers from the PDF ( {start_page} - {end_page} ).
@@ -232,7 +236,7 @@ OUTPUT FORMAT (strict)
         except Exception as e:
             self.print_progress(f"Error generating notes: {e}")
             self.sound_player.play_sound("error")
-            return f"Error generating notes: {str(e)}"
+            raise
             
     def convert_pdf_pages_to_images(self, extracted_pdf_path: str, output_folder: str):
         """Convert PDF pages to images using PyMuPDF and return list of image paths."""
@@ -716,7 +720,9 @@ def main():
     END_PAGE = pdf_config["end_page"]
     
     print("=== PDF Notes Generator ===")
-    print("This tool generates detailed study notes in Sinhala from PDF files.")
+    print("This tool generates detailed study notes from PDF files.")
+
+    print(f"Using model: {LLM_MODEL}")
     
     # Create generator and process PDF
     generator = SimplePDFNotesGenerator(api_key=API_KEY)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Jumpcutter Video Silence Remover
-Automatically removes silent parts from videos using the jumpcutter library
+Video Silence Remover
+Automatically removes silent parts from videos
 """
 
 import os
@@ -38,14 +38,15 @@ def check_and_install_dependencies():
     for package in required_packages:
         try:
             __import__(package.replace('-', '_'))
-            logger.info(f"{package} is already installed")
+            # logger.info(f"{package} is already installed")
         except ImportError:
             logger.info(f"Installing {package}...")
             install_package(package)
 
 def load_config():
     """Load configuration from inputs.json"""
-    config_file = "inputs.json"
+    # Look for inputs.json in the parent directory (project root)
+    config_file = os.path.join(os.path.dirname(__file__), "..", "inputs.json")
     
     if not os.path.exists(config_file):
         logger.error(f"Configuration file {config_file} not found!")
@@ -172,7 +173,7 @@ def main():
         "bitrate": ""
     }
     
-    logger.info("Starting Jumpcutter Video Silence Remover...")
+    logger.info("Starting Video Silence Remover...")
     
     # Sound notification - start
     try:

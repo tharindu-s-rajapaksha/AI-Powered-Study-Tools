@@ -103,7 +103,7 @@ def main():
     # =========================================================================
     
     # Select which tool to run (use the key from TOOL_CONFIGS)
-    tool_key = "note_generator_sinhala"  # Change this to run different tools
+    tool_key = "video_silence_remover"  # Change this to run different tools
     
     # Define your batch configurations here
     # For PDF Note Generator - specify page ranges:
@@ -111,16 +111,45 @@ def main():
     #     "start_page": start,
     #     "end_page": end
     # } for start, end in [
-    #     (196, 200),
-    #     (206, 210),
-    #     (216, 220),
+    #     (1, 20),
+    #     (21, 40),
+    #     (41, 60),
+    #     (61, 80),
+    #     (81, 104)
     # ]]
     
     # For other tools, specify field values for each batch:
     # Example for video transcriber:
+    # batch_configs = [
+    #     {"text_file": "D:/Desktop/UNI/~ACA - L3S2/CM3620 - Natural Language Processing/Lecture Recordings/2025-10-08 Lec_10_silence_removed_transcription.txt"},
+    #     {"text_file": "D:/Desktop/UNI/~ACA - L3S2/CM3620 - Natural Language Processing/Lecture Recordings/2025-10-15 Lec_12_silence_removed_transcription.txt"}
+    # ]
+
     batch_configs = [
-        {"text_file": "D:/Desktop/UNI/~ACA - L3S2/CM3620 - Natural Language Processing/Lecture Recordings/2025-10-08 Lec_10_silence_removed_transcription.txt"},
-        {"text_file": "D:/Desktop/UNI/~ACA - L3S2/CM3620 - Natural Language Processing/Lecture Recordings/2025-10-15 Lec_12_silence_removed_transcription.txt"}
+        {
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec01.mp4",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec01_silence_removed.mp4"
+        },
+        {
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec02.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec02_silence_removed.mp4"
+        },
+        {
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec03.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec03_silence_removed.mp4"
+        },
+        {
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec04.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec04_silence_removed.mp4"
+        },
+        {
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec06.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec06_silence_removed.mp4"
+        },
+        {
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec08.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec08_silence_removed.mp4"
+        },
     ]
     
     # Example for pdf_splitter:

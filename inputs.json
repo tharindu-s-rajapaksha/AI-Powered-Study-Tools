@@ -1,10 +1,12 @@
 {
   "video_transcriber": {
-    "video_path": "D:/Desktop/UNI/~ACA - L3S2/CM3620 - Natural Language Processing/Lecture Recordings/2025-10-13 Lec_11_silence_removed.mp4"
+    "video_path": "D:/Desktop/UNI/~ACA - L4S1/Module Selection Discussion - 2025-11-17 18-05-59.mkv"
   },
   "note_generator": {
-    "text_file": "D:/Desktop/UNI/~ACA - L3S2/CM3620 - Natural Language Processing/Lecture Recordings/2025-10-13 Lec_11_silence_removed_transcription.txt",
-    "video_path": "D:/Desktop/UNI/~ACA - L3S2/CM3530 - Research Methods/Recordings/2025-10-02_silence_removed.mp4"
+    "text_file": "D:/Desktop/UNI/~ACA - L4S1/Module Selection Discussion - 2025-11-17 18-05-59_transcription.txt",
+    "video_path": "D:/Desktop/UNI/~ACA - L3S2/CM3530 - Research Methods/Recordings/2025-10-02_silence_removed.mp4",
+    "start_page": 11,
+    "end_page": 20
   },
   "translate_sinhala_html": {
     "input_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/2025-09-03 02-58-41-nlp_transcription_notes.html",
@@ -15,9 +17,9 @@
     "output_file": "D:/Desktop/Social Aspects of IT - Sinhala.md"
   },
   "pdf_note_generator": {
-    "pdf_file": "D:/Desktop/UNI/~ACA - L3S2/IS4430 - Social Aspects of IT/Ann's Note - Final.pdf",
-    "start_page": 111,
-    "end_page": 120
+    "pdf_file": "D:\\Desktop\\UNI\\~ACA - L4S1\\IN4640 - Machine Vision\\03. Point Operations\\L02 Point Operations.pdf",
+    "start_page": 11,
+    "end_page": 20
   },
   "pdf_splitter": {
     "input_pdf": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 3 Data Preprocessing/Chapter 3.pdf",
@@ -33,7 +35,7 @@
     "output_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/comparison_view.html"
   },
   "video_silence_remover": {
-    "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4650 - Semantic Web & Ontological Modelling/2025-11-19 SW & Ontology_Lec01.mkv",
-    "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4650 - Semantic Web & Ontological Modelling/2025-11-19 SW & Ontology_Lec01_silence_removed.mp4"
+    "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec01.mp4",
+    "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec01_silence_removed.mp4"
   }
 }
