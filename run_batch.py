@@ -127,28 +127,36 @@ def main():
 
     batch_configs = [
         {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec01.mp4",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec01_silence_removed.mp4"
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-17 RS_Lec_01.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-17 RS_Lec_01_silence_removed.mp4"
         },
         {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec02.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec02_silence_removed.mp4"
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-25 RS_Lec_02.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-25 RS_Lec_02_silence_removed.mp4"
         },
         {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec03.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec03_silence_removed.mp4"
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-12-16 RS_Lec03.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-12-16 RS_Lec03_silence_removed.mp4"
         },
         {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec04.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec04_silence_removed.mp4"
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-06 RS_ Lec04.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-06 RS_ Lec04_silence_removed.mp4"
         },
         {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec06.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec06_silence_removed.mp4"
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-20 RS_ Lec05.mp4",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-20 RS_ Lec05_silence_removed.mp4"
         },
         {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec08.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec08_silence_removed.mp4"
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-27 RS_ Lec06.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-27 RS_ Lec06_silence_removed.mp4"
+        },
+        {
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-02-03 Lec07.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-02-03 Lec07_silence_removed.mp4"
+        },
+        {
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-02-10 RS_ Lec08.mkv",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-02-10 RS_ Lec08_silence_removed.mp4"
         },
     ]
     

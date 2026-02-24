@@ -149,16 +149,16 @@ def main():
     # You can modify these values to fine-tune the silence removal
     JUMPCUTTER_PARAMS = {
         # Silence detection sensitivity (lower = more sensitive)
-        "magnitude_threshold_ratio": 0.02, # (0.01-0.1)
+        "magnitude_threshold_ratio": 0.01, # (0.01-0.1)
         
         # Minimum silence duration to cut
-        "duration_threshold": 0.6, # (in seconds)
+        "duration_threshold": 0.5, # (in seconds)
         
         # Tolerance for audio spikes in silent parts 
         "failure_tolerance_ratio": 0.1, # (0.0-1.0)
         
         # Space to leave on edges of cuts
-        "space_on_edges": 0.25, # (in seconds)
+        "space_on_edges": 0.24, # (in seconds)
         
         # Speed up silent parts instead of cutting (use high number like 2000 to effectively remove)
         "silence_part_speed": 10,

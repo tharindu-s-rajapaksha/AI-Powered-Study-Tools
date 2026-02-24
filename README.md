@@ -152,4 +152,4 @@ The runner will back up the original section from `inputs.json`, apply the overr
 
 ---
 
-_Academic use only—double-check all AI-generated content before sharing or publishing._
+_Academic use only. double-check all AI-generated content before sharing or publishing._

@@ -35,7 +35,7 @@
     "output_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/comparison_view.html"
   },
   "video_silence_remover": {
-    "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec01.mp4",
-    "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec01_silence_removed.mp4"
+    "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Recordings/2026-02-12 philosophy Lec_08.mkv",
+    "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Recordings/2026-02-12 philosophy Lec_08_silence_removed.mp4"
   }
 }
