@@ -89,31 +89,40 @@ class SoundPlayer:
         sound_name = sounds.get(sound_type, "Pop")
         os.system(f"afplay /System/Library/Sounds/{sound_name}.aiff &")
 
-def install_package(package):
+def install_package(package, extra_args=None):
     """Install a package using pip"""
+    cmd = [sys.executable, "-m", "pip", "install", package]
+    if extra_args:
+        cmd.extend(extra_args)
     try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+        subprocess.check_call(cmd)
         logger.info(f"Successfully installed {package}")
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to install {package}: {e}")
         sys.exit(1)
 
 def check_and_install_dependencies():
-    """Check and install required dependencies"""
-    required_packages = [
-        "jumpcutter",
-        "numpy"
-    ]
+    """Check and install required dependencies with version constraints"""
+    # Note: We install jumpcutter with --no-deps to avoid it downgrading moviepy
+    # since we are manually patching jumpcutter for moviepy 2.x compatibility.
+    required_packages = {
+        "moviepy": "moviepy>=2.2.1",
+        "numpy": "numpy>=2.0.0",
+        "tqdm": "tqdm>=4.65.0",
+        "jumpcutter": "jumpcutter"
+    }
     
     logger.info("Checking and installing dependencies...")
     
-    for package in required_packages:
+    import pkg_resources
+    
+    for package_name, install_spec in required_packages.items():
         try:
-            __import__(package.replace('-', '_'))
-            # logger.info(f"{package} is already installed")
-        except ImportError:
-            logger.info(f"Installing {package}...")
-            install_package(package)
+            pkg_resources.require(install_spec)
+        except (pkg_resources.DistributionNotFound, pkg_resources.VersionConflict, Exception):
+            logger.info(f"Installing/Updating {install_spec}...")
+            extra_args = ["--no-deps"] if package_name == "jumpcutter" else None
+            install_package(install_spec, extra_args)
 
 def load_config():
     """Load configuration from inputs.json"""

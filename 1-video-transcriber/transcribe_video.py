@@ -1,6 +1,7 @@
 import os
 import platform
-import moviepy.editor as mp
+import moviepy as mp
+import ctranslate2
 from faster_whisper import WhisperModel
 import json
 
@@ -78,18 +79,29 @@ class SoundPlayer:
 
 
 class VideoTranscriber:
-    def __init__(self, model_size="small", device="cuda", compute_type="int8"):
+    def __init__(self, model_size="small", device=None, compute_type=None):
         """
         Initialize the VideoTranscriber with the specified Whisper model parameters.
 
         Parameters:
         model_size (str): Size of the Whisper model to use ("tiny", "base", "small", "medium", "large").
-        device (str): Device to use for the model (e.g., "cuda", "cpu").
-        compute_type (str): Compute type for the model (e.g., "int8", "float32").
+        device (str): Device to use for the model (e.g., "cuda", "cpu"). If None, auto-detected.
+        compute_type (str): Compute type for the model. If None, set based on device.
         """
         self.model_size = model_size
-        self.device = device
-        self.compute_type = compute_type
+        
+        # Auto-detect device if not specified
+        if device is None:
+            self.device = "cuda" if ctranslate2.get_cuda_device_count() > 0 else "cpu"
+        else:
+            self.device = device
+            
+        # Set compute type based on device if not specified
+        if compute_type is None:
+            self.compute_type = "float16" if self.device == "cuda" else "int8"
+        else:
+            self.compute_type = compute_type
+            
         self.model = None
         self.sound_player = SoundPlayer()
 
@@ -197,6 +209,6 @@ if __name__ == "__main__":
     with open(inputs_path, "r") as f:
         inputs = json.load(f)
     
-    transcriber = VideoTranscriber(device="cuda")
+    transcriber = VideoTranscriber() # Now auto-detects device
     # transcriber.transcribe_folder("D:/Desktop/UNI/~ACA - L3S1/CM3640 - Artificial Cognitive Systems/Recordings")
     transcriber.transcribe_one_video(inputs["video_transcriber"]["video_path"])
