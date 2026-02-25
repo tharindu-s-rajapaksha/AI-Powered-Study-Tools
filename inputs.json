@@ -3,7 +3,7 @@
     "audio_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec07(voice2).m4a"
   },
   "video_transcriber": {
-    "video_path": "D:/Acedemic/Fourth Year/DL/DL - 05.mp4"
+    "video_path": "D:/Acedemic/Fourth Year/DL/DL - 06.mp4"
   },
   "note_generator": {
     "text_file": "D:/Desktop/UNI/~ACA - L4S1/Module Selection Discussion - 2025-11-17 18-05-59_transcription.txt",
@@ -38,11 +38,11 @@
     "output_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/comparison_view.html"
   },
   "video_silence_remover": {
-    "input_file": "D:/Acedemic/Fourth Year/ABM/ABM - 01 Part 02.mp4",
-    "output_file": "D:/Acedemic/Fourth Year/ABM/ABM - 01 Part 02_silence_removed.mp4"
+    "input_file": "D:/Acedemic/Fourth Year/ABM/ABM - 03.mp4",
+    "output_file": "D:/Acedemic/Fourth Year/ABM/ABM - 03_silence_removed.mp4"
   },
   "subtitle_generator": {
-    "video_path": "D:/Acedemic/Fourth Year/DL/DL - 05.mp4",
-    "output_path": "D:/Acedemic/Fourth Year/DL/DL - 05.srt"
+    "video_path": "D:/Acedemic/Fourth Year/DL/DL - 06.mp4",
+    "output_path": "D:/Acedemic/Fourth Year/DL/DL - 06.srt"
   }
 }
