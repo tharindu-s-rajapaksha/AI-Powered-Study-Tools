@@ -11,6 +11,11 @@ from pathlib import Path
 
 # Tool configurations - maps tool names to their scripts
 TOOL_CONFIGS = {
+    "audio_transcriber": {
+        "script": "0-audio-transcriber/transcribe_audio.py",
+        "name": "Audio Transcriber",
+        "config_key": "audio_transcriber"
+    },
     "pdf_note_generator": {
         "script": "3-note-generator/pdf_notes_generator.py",
         "name": "PDF Notes Generator",
@@ -119,12 +124,26 @@ def main():
     # ]]
     
     # For other tools, specify field values for each batch:
+    
+    # Example for audio transcriber:
+    # batch_configs = [
+    #     {"audio_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec05(voice).m4a"},
+    #     {"audio_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec07(voice1).m4a"},
+    #     {"audio_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec07(voice2).m4a"},
+    # ]
+    
     # Example for video transcriber:
     # batch_configs = [
-    #     {"text_file": "D:/Desktop/UNI/~ACA - L3S2/CM3620 - Natural Language Processing/Lecture Recordings/2025-10-08 Lec_10_silence_removed_transcription.txt"},
-    #     {"text_file": "D:/Desktop/UNI/~ACA - L3S2/CM3620 - Natural Language Processing/Lecture Recordings/2025-10-15 Lec_12_silence_removed_transcription.txt"}
+    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec01_silence_removed.mp4"},
+    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec02_silence_removed.mp4"},
+    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec03_silence_removed.mp4"},
+    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec04_silence_removed.mp4"},
+    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec06_silence_removed.mp4"},
+    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec08_silence_removed.mp4"},
+    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec09_silence_removed.mp4"},
     # ]
 
+    # Example for video silence remover:
     batch_configs = [
         {
             "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-17 RS_Lec_01.mkv",

@@ -1,4 +1,7 @@
 {
+  "audio_transcriber": {
+    "audio_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec07(voice2).m4a"
+  },
   "video_transcriber": {
     "video_path": "D:/Desktop/UNI/~ACA - L4S1/Module Selection Discussion - 2025-11-17 18-05-59.mkv"
   },
@@ -35,7 +38,7 @@
     "output_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/comparison_view.html"
   },
   "video_silence_remover": {
-    "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-02-03 Lec07.mkv",
-    "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-02-03 Lec07_silence_removed.mp4"
+    "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-17 RS_Lec_01.mkv",
+    "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-17 RS_Lec_01_silence_removed.mp4"
   }
 }

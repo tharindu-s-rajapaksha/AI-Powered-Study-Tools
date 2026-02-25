@@ -9,13 +9,85 @@ import sys
 import subprocess
 import json
 import logging
-import winsound
+import platform
 from pathlib import Path
 import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+class SoundPlayer:
+    """Handle sound playback across different platforms."""
+    
+    def __init__(self):
+        self.system = platform.system()
+        
+    def play_sound(self, sound_type: str):
+        """Play system sound based on event type."""
+        try:
+            if self.system == "Linux":
+                self._play_linux_sound(sound_type)
+            elif self.system == "Windows":
+                self._play_windows_sound(sound_type)
+            elif self.system == "Darwin":  # macOS
+                self._play_macos_sound(sound_type)
+        except Exception as e:
+            logger.debug(f"Could not play sound: {e}")
+    
+    def _play_linux_sound(self, sound_type: str):
+        """Play sound on Linux using paplay or beep."""
+        sounds = {
+            "start": "message",
+            "step": "message-new-instant",
+            "complete": "complete",
+            "error": "dialog-error"
+        }
+        
+        sound_name = sounds.get(sound_type, "message")
+        
+        # Try paplay first (works with PulseAudio)
+        try:
+            os.system(f"paplay /usr/share/sounds/freedesktop/stereo/{sound_name}.oga 2>/dev/null &")
+        except:
+            # Fallback to beep
+            try:
+                frequencies = {
+                    "start": "800 -l 100",
+                    "step": "600 -l 80",
+                    "complete": "1000 -l 150",
+                    "error": "400 -l 200"
+                }
+                freq = frequencies.get(sound_type, "600 -l 80")
+                os.system(f"beep -f {freq} 2>/dev/null &")
+            except:
+                pass
+    
+    def _play_windows_sound(self, sound_type: str):
+        """Play sound on Windows."""
+        import winsound
+        
+        sounds = {
+            "start": (1000, 200),
+            "step": (2000, 200),
+            "complete": (5000, 1000),
+            "error": (150, 1000)
+        }
+        
+        freq, duration = sounds.get(sound_type, (600, 80))
+        winsound.Beep(freq, duration)
+    
+    def _play_macos_sound(self, sound_type: str):
+        """Play sound on macOS."""
+        sounds = {
+            "start": "Glass",
+            "step": "Pop",
+            "complete": "Hero",
+            "error": "Basso"
+        }
+        
+        sound_name = sounds.get(sound_type, "Pop")
+        os.system(f"afplay /System/Library/Sounds/{sound_name}.aiff &")
 
 def install_package(package):
     """Install a package using pip"""
@@ -175,11 +247,8 @@ def main():
     
     logger.info("Starting Video Silence Remover...")
     
-    # Sound notification - start
-    try:
-        winsound.Beep(480, 500)
-    except:
-        pass
+    sound_player = SoundPlayer()
+    sound_player.play_sound("start")
 
     # Install dependencies
     check_and_install_dependencies()
@@ -207,15 +276,10 @@ def main():
         duration = end_time - start_time
         logger.info(f"Total processing time: {duration:.2f} seconds")
         
-        # Sound notification - completion
-        for freq in [480, 600, 720, 600, 480, 360]:
-            winsound.Beep(freq, 300)
-        
+        sound_player.play_sound("complete")
         logger.info("Video processing completed successfully!")
     except Exception as e:
-        # Error sound
-        winsound.Beep(300, 1000)
-
+        sound_player.play_sound("error")
         logger.error(e)
 
 if __name__ == "__main__":

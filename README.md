@@ -20,6 +20,9 @@ AI-Powered-Study-Tools/
 ├── run_batch.py                   # Batch runner to execute tools sequentially
 ├── .env.example                   # Template for API keys (.env)
 │
+├── 0-audio-transcriber/
+│   └── transcribe_audio.py        # Extract speech → text from audio files (mp3, m4a, wav, etc.)
+│
 ├── 1-video-transcriber/
 │   └── transcribe_video.py        # Extract speech → text from video files
 │
@@ -129,6 +132,9 @@ Get a free Google API key: https://aistudio.google.com/app/apikey
 
 ```json
 {
+  "audio_transcriber": {
+    "audio_path": "path/to/audio.mp3"
+  },
   "video_transcriber": {
     "video_path": "path/to/lecture.mkv"
   },
@@ -192,6 +198,26 @@ Get a free Google API key: https://aistudio.google.com/app/apikey
 - **empty_threshold** — pages > 95% white are considered empty and discarded
 
 ## 🛠️ Tools Guide
+
+### 0️⃣ Audio Transcriber
+**Module**: `0-audio-transcriber/transcribe_audio.py`  
+**Purpose**: Convert audio files to text transcripts using Faster-Whisper  
+**Input** (from `inputs.json`):
+- `audio_transcriber.audio_path` — path to audio file (`.mp3`, `.m4a`, `.wav`, `.flac`, `.ogg`, `.opus`, `.aac`, `.wma`)
+
+**Output**:
+- `<audio_name>_transcription.txt` — plain text transcript
+
+**Usage**:
+```bash
+python 0-audio-transcriber/transcribe_audio.py
+```
+
+**Speed**: ~10-20x real-time with GPU; ~1-2x with CPU
+
+**Supported Formats**: MP3, M4A, WAV, FLAC, OGG, Opus, AAC, WMA
+
+---
 
 ### 1️⃣ Video Transcriber
 **Module**: `1-video-transcriber/transcribe_video.py`  
