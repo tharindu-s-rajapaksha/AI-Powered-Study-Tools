@@ -2,7 +2,7 @@ import os
 import re
 import time
 import random
-import winsound
+import platform
 import markdown
 from datetime import datetime
 import google.generativeai as genai
@@ -12,13 +12,85 @@ import json
 # Load environment variables from .env file
 load_dotenv()
 
+class SoundPlayer:
+    """Handle sound playback across different platforms."""
+    
+    def __init__(self):
+        self.system = platform.system()
+        
+    def play_sound(self, sound_type: str):
+        """Play system sound based on event type."""
+        try:
+            if self.system == "Linux":
+                self._play_linux_sound(sound_type)
+            elif self.system == "Windows":
+                self._play_windows_sound(sound_type)
+            elif self.system == "Darwin":  # macOS
+                self._play_macos_sound(sound_type)
+        except Exception as e:
+            print(f"Could not play sound: {e}")
+    
+    def _play_linux_sound(self, sound_type: str):
+        """Play sound on Linux using paplay or beep."""
+        sounds = {
+            "start": "message",
+            "step": "message-new-instant",
+            "complete": "complete",
+            "error": "dialog-error"
+        }
+        
+        sound_name = sounds.get(sound_type, "message")
+        
+        # Try paplay first (works with PulseAudio)
+        try:
+            os.system(f"paplay /usr/share/sounds/freedesktop/stereo/{sound_name}.oga 2>/dev/null &")
+        except:
+            # Fallback to beep
+            try:
+                frequencies = {
+                    "start": "800 -l 100",
+                    "step": "600 -l 80",
+                    "complete": "1000 -l 150",
+                    "error": "400 -l 200"
+                }
+                freq = frequencies.get(sound_type, "600 -l 80")
+                os.system(f"beep -f {freq} 2>/dev/null &")
+            except:
+                pass
+    
+    def _play_windows_sound(self, sound_type: str):
+        """Play sound on Windows."""
+        import winsound
+        
+        sounds = {
+            "start": (1000, 200),
+            "step": (2000, 200),
+            "complete": (5000, 1000),
+            "error": (150, 1000)
+        }
+        
+        freq, duration = sounds.get(sound_type, (600, 80))
+        winsound.Beep(freq, duration)
+    
+    def _play_macos_sound(self, sound_type: str):
+        """Play sound on macOS."""
+        sounds = {
+            "start": "Glass",
+            "step": "Pop",
+            "complete": "Hero",
+            "error": "Basso"
+        }
+        
+        sound_name = sounds.get(sound_type, "Pop")
+        os.system(f"afplay /System/Library/Sounds/{sound_name}.aiff &")
+
 class SimpleNoteGenerator:
     def __init__(self, api_key: str, text_file: str):
         self.text_file = text_file
         self.api_key = api_key
         self.model = None
-        self.chunk_size = 50000  # Characters per chunk
-        self.overlap = 1000      # Overlap between chunks
+        self.chunk_size = 10000  # Characters per chunk
+        self.overlap = 500      # Overlap between chunks
         
         # Configure the API
         genai.configure(api_key=api_key)
@@ -401,27 +473,21 @@ def main():
     
     TEXT_FILE = inputs["note_generator"]["text_file"]
     
+    # Initialize sound player
+    sound_player = SoundPlayer()
+    
     # Sound notification - start
-    try:
-        winsound.Beep(480, 500)
-    except:
-        pass
+    sound_player.play_sound("start")
     
     # Create and run the generator
     generator = SimpleNoteGenerator(api_key=API_KEY, text_file=TEXT_FILE)
     result = generator.run()
     
     # Sound notification - completion
-    try:
-        if result:
-            # Success melody
-            for freq in [480, 600, 720, 600, 480, 360]:
-                winsound.Beep(freq, 300)
-        else:
-            # Error sound
-            winsound.Beep(300, 1000)
-    except:
-        pass
+    if result:
+        sound_player.play_sound("complete")
+    else:
+        sound_player.play_sound("error")
 
 
 if __name__ == "__main__":
