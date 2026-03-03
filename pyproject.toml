@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-powered-study-tools"
+version = "1.0.0"
+description = "A comprehensive suite of Python utilities for automated video transcription, AI-assisted note generation, and lecture processing"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Tharindu S Rajapaksha" }
+]
+keywords = [
+    "video-transcription",
+    "note-generation",
+    "ai",
+    "lecture-tools",
+    "whisper",
+    "gemini",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    # Core Transcription & Audio
+    "faster-whisper==1.1.1",
+    "PyAudio==0.2.14",
+    "numpy==1.23.5",
+    "moviepy==1.0.3",
+    "jumpcutter==0.1.6",
+    
+    # Note Generation & Translation
+    "google-generativeai==0.8.3",
+    "google-genai==1.32.0",
+    "httpx==0.28.1",
+    "Markdown==3.7",
+    
+    # PDF Processing
+    "PyPDF2==3.0.1",
+    "PyMuPDF==1.26.5",
+    "Pillow==11.3.0",
+    "opencv-python==4.12.0.88",
+    
+    # Utilities
+    "python-dotenv==1.0.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/tharindu-s-rajapaksha/AI-Powered-Study-Tools"
+Repository = "https://github.com/tharindu-s-rajapaksha/AI-Powered-Study-Tools.git"
+Issues = "https://github.com/tharindu-s-rajapaksha/AI-Powered-Study-Tools/issues"
+
+[tool.uv]
+# uv configuration for Python package management
+python = "3.10"
+
+[tool.uv.sources]
+# Add any custom package sources if needed

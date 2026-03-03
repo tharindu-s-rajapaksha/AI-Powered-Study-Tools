@@ -10,7 +10,7 @@ import platform
 import json
 import logging
 from datetime import timedelta
-import moviepy as mp
+from moviepy.editor import VideoFileClip
 import ctranslate2
 from faster_whisper import WhisperModel
 
@@ -107,7 +107,7 @@ class LectureSubtitleGenerator:
             logger.info(f"Processing video: {video_path}")
             
             # Use MoviePy to extract audio
-            video = mp.VideoFileClip(video_path)
+            video = VideoFileClip(video_path)
             audio = video.audio
             
             output_dir = "output"

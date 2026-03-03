@@ -3,15 +3,27 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.egg-info/
+dist/
+build/
 
-# Environment
+# Environment & virtual environments
 .env
+.env.local
+.env.*.local
 venv/
 env/
+.venv/
+
+# uv package manager
+uv.lock
 
 # IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
 # Output files
 output/
@@ -23,3 +35,6 @@ output/
 comparison_view.html
 translated_sinhala.html
 transcript.txt
+frames/
+*.srt
+*.vtt

@@ -1,6 +1,6 @@
 import os
 import platform
-import moviepy as mp
+from moviepy.editor import VideoFileClip
 import ctranslate2
 from faster_whisper import WhisperModel
 import json
@@ -127,7 +127,7 @@ class VideoTranscriber:
         try:
             self.sound_player.play_sound("start")
             print("Extracting audio from video...")
-            video = mp.VideoFileClip(video_path)
+            video = VideoFileClip(video_path)
             audio = video.audio
 
             # Create output directory if it doesn't exist

@@ -1,3 +1,15 @@
+# ⚠️ DEPRECATED: This file is maintained for backward compatibility only.
+# 
+# The project now uses uv package manager and pyproject.toml for dependency management.
+# 
+# To use the modern approach:
+#   1. Install uv: https://docs.astral.sh/uv/
+#   2. Run: uv sync
+#   3. See UV_SETUP.md for detailed instructions
+#
+# If you must use pip, you can still install from this file:
+#   pip install -r requirements.txt
+
 # Core Transcription & Audio
 faster-whisper==1.1.1
 PyAudio==0.2.14

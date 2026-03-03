@@ -17,7 +17,8 @@ A comprehensive suite of Python utilities that automate the most time-consuming 
 ```
 AI-Powered-Study-Tools/
 ├── inputs.json                    # Central configuration for all tools
-├── requirements.txt               # Python dependencies
+├── pyproject.toml                 # Python dependencies & project metadata
+├── uv.lock                        # Locked dependency versions (auto-generated)
 ├── run_batch.py                   # Batch runner to execute tools sequentially
 ├── .env.example                   # Template for API keys (.env)
 │
@@ -60,13 +61,15 @@ AI-Powered-Study-Tools/
 git clone https://github.com/tharindu-s-rajapaksha/AI-Powered-Study-Tools.git
 cd AI-Powered-Study-Tools
 
-# 2. Create virtual environment
-python -m venv .venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate    # macOS / Linux
+# 2. Install uv (if not already installed)
+# macOS / Linux:
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# Windows (with pipx):
+pipx install uv
+# Or download from: https://github.com/astral-sh/uv/releases
 
 # 3. Install dependencies
-pip install -r requirements.txt
+uv sync
 
 # 4. Set up API keys
 cp .env.example .env
@@ -76,36 +79,46 @@ cp .env.example .env
 # Edit inputs.json with your file paths
 
 # 6. Run a tool
-python 1-video-transcriber/transcribe_video.py
+uv run python 1-video-transcriber/transcribe_video.py
 # OR run batch
-python run_batch.py
+uv run python run_batch.py
 ```
 
 ## 📋 Installation & Requirements
 
 - **Python 3.8+** (3.10+ recommended)
+- **uv** — Ultra-fast Python package manager (https://github.com/astral-sh/uv)
 - **CUDA-capable GPU** (optional but recommended for 10-100x transcription speedup)
 - **FFmpeg** (for video/audio processing)
 - **Google API Key** (for Gemini-powered note generation)
 
-### Step 1: Clone & Setup Environment
+### Step 1: Install uv
+
+**macOS / Linux:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Windows (with pipx):**
+```bash
+pipx install uv
+```
+
+Or download the latest release: https://github.com/astral-sh/uv/releases
+
+### Step 2: Clone & Setup
 
 ```bash
 git clone https://github.com/tharindu-s-rajapaksha/AI-Powered-Study-Tools.git
 cd AI-Powered-Study-Tools
 
-python -m venv .venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate    # macOS / Linux
+# Install all dependencies
+uv sync
 ```
 
-### Step 2: Install Dependencies
+### Step 3: Install Dependencies
 
-```bash
-pip install -r requirements.txt
-```
-
-**Dependencies Overview:**
+All dependencies are managed through `pyproject.toml`. The `uv sync` command above handles everything:
 
 - `faster-whisper` — Speech-to-text engine
 - `google-generativeai` — Gemini API for note generation
@@ -114,7 +127,7 @@ pip install -r requirements.txt
 - `opencv-python` — Frame extraction & image processing
 - `python-dotenv` — Environment variable management
 
-### Step 3: Configure API Keys
+### Step 4: Configure API Keys
 
 Copy `.env.example` to `.env` and add your credentials:
 
@@ -668,7 +681,7 @@ python 2-real-time-transcriber/real_time_transcription.py
 
   ```bash
   # Verify GPU is being used:
-  pip show faster-whisper  # Should show CUDA support
+  uv pip show faster-whisper  # Should show CUDA support
   ```
 
 - **Use Smaller Models for Testing**:
@@ -717,7 +730,7 @@ Then set `device_index` in `inputs.json`
 **Solution**:
 
 ```bash
-pip install --upgrade google-generativeai
+uv pip install --upgrade google-generativeai
 ```
 
 ### "GOOGLE_API_KEY not found in .env"
@@ -744,7 +757,7 @@ pip install --upgrade google-generativeai
 **Solution**:
 
 - Convert to `.mp4` first: `ffmpeg -i input.mkv output.mp4`
-- Or install `ffmpeg-python`: `pip install ffmpeg-python`
+- Or install `ffmpeg-python`: `uv pip install ffmpeg-python`
 
 ### PDF Splitter Adds Extra Blank Pages
 
@@ -822,7 +835,7 @@ pip install --upgrade google-generativeai
 | `Pillow`              | Image I/O         | ✅        |
 | `python-dotenv`       | Env file loading  | ✅        |
 
-See `requirements.txt` for full list and pinned versions.
+See `pyproject.toml` for full list and pinned versions.
 
 ---
 
