@@ -186,16 +186,50 @@ class SimplePDFNotesGenerator:
             self.sound_player.play_sound("error")
             raise
             
-    def generate_notes_from_pdf(self, pdf_file, start_page, end_page, summary: str = ""):
-        """Generate notes from the uploaded PDF."""
+    def load_transcription(self, transcription_file: str) -> str:
+        """Load transcription from file if it exists."""
+        if not transcription_file or not os.path.exists(transcription_file):
+            return ""
+        
         try:
-            # Create the prompt for note generation with summary context
+            self.print_progress(f"Loading transcription from: {os.path.basename(transcription_file)}")
+            with open(transcription_file, "r", encoding='utf-8') as f:
+                transcription = f.read().strip()
+            
+            if transcription:
+                self.print_progress(f"Transcription loaded successfully ({len(transcription)} characters)")
+                self.sound_player.play_sound("step")
+                return transcription
+            return ""
+        except Exception as e:
+            self.print_progress(f"Warning: Could not load transcription file: {e}")
+            return ""
+    
+    def generate_notes_from_pdf(self, pdf_file, start_page, end_page, summary: str = "", transcription: str = ""):
+        """Generate notes from the uploaded PDF with optional transcription context."""
+        try:
+            # Build contextual information for the model
+            context_parts = []
+            
+            if summary:
+                context_parts.append(f"""LECTURE SUMMARY:
+{summary}""")
+            
+            if transcription:
+                context_parts.append(f"""LECTURE TRANSCRIPTION (audio content):
+{transcription}""")
+            
+            context_section = "\n\n".join(context_parts) if context_parts else "No context available"
+            
+            # Create the prompt for note generation with summary and transcription context
             prompt = f"""
-CONTEXT (for reference only):
-{summary}
+CONTEXT INFORMATION (for reference and enhanced understanding):
+{context_section}
 
 TASK
 - You are given PDF pages {start_page}-{end_page} from a lecture note.
+- Use the context information above (lecture summary and/or transcription) to better understand the content and provide more accurate and comprehensive explanations.
+- Focus on explaining the content from the PDF pages {start_page}-{end_page}, but enrich your explanations with insights from the transcription when relevant. If you add anything from the lecture transcription, state it clearly.
 - IMPORTANT: Explain everything VERY VERY SIMPLY in {LANGUAGE} language - like explaining to a friend who doesn't know anything about this topic. Use everyday simple {LANGUAGE} words that anyone can understand easily. Break down complex ideas into simple, easy-to-understand explanations. Make it as simple as possible - like teaching a beginner.
 - Write in a friendly, conversational {LANGUAGE} style - as if you're having a casual chat with a friend over tea. Use simple everyday language.
 - Include ALL the exact details but explain them in the SIMPLEST {LANGUAGE} possible - do not skip or omit anything, just make it easy to understand
@@ -217,10 +251,7 @@ OUTPUT FORMAT (strict)
 
 - Continue the same pattern up to page {end_page}.
 - IMPORTANT: Do not mark pages from 1 to {end_page - start_page + 1} - Use the actual page numbers from the PDF ( {start_page} - {end_page} ).
-
 """
-
-# Prompt intentionally kept short and direct to avoid over-complication.
 
             self.print_progress(f"Generating notes for pages {start_page}-{end_page}")
             
@@ -635,8 +666,8 @@ Write the summary in English."""
         except Exception as e:
             self.print_progress(f"Could not cleanup uploaded file: {e}")
             
-    def generate_notes(self, pdf_path: str, start_page: int, end_page: int):
-        """Main method to generate notes from PDF."""
+    def generate_notes(self, pdf_path: str, start_page: int, end_page: int, transcription_file: str = ""):
+        """Main method to generate notes from PDF with optional transcription."""
         self.print_progress("Starting PDF note generation process...")
         self.sound_player.play_sound("start")
         start_time = time.time()
@@ -655,6 +686,9 @@ Write the summary in English."""
             print(f"Pages: {start_page}-{end_page}")
             print()
 
+            # Load transcription if provided
+            transcription = self.load_transcription(transcription_file) if transcription_file else ""
+            
             # Get or create summary of the full PDF
             summary = self.get_or_create_summary(pdf_path)
             
@@ -673,8 +707,8 @@ Write the summary in English."""
             # Override summary for specific page range
             # summary = "Summary not provided. Because the full PDF has been given currently. So explain exact everything in the given PDF pages."
             
-            # Generate notes with summary context
-            notes = self.generate_notes_from_pdf(pdf_file, start_page, end_page, summary)
+            # Generate notes with summary and optional transcription context
+            notes = self.generate_notes_from_pdf(pdf_file, start_page, end_page, summary, transcription)
             
             # Save notes
             notes_file = self.save_notes(notes, pdf_path, start_page, end_page, output_folder)
@@ -719,14 +753,19 @@ def main():
     START_PAGE = pdf_config["start_page"]
     END_PAGE = pdf_config["end_page"]
     
+    # Optional transcription file (can be omitted from config)
+    TRANSCRIPTION_FILE = pdf_config.get("transcription_file", "")
+    
     print("=== PDF Notes Generator ===")
     print("This tool generates detailed study notes from PDF files.")
+    if TRANSCRIPTION_FILE and os.path.exists(TRANSCRIPTION_FILE):
+        print("Transcription file will be used to enhance context.")
 
     print(f"Using model: {LLM_MODEL}")
     
     # Create generator and process PDF
     generator = SimplePDFNotesGenerator(api_key=API_KEY)
-    result = generator.generate_notes(PDF_FILE, START_PAGE, END_PAGE)
+    result = generator.generate_notes(PDF_FILE, START_PAGE, END_PAGE, TRANSCRIPTION_FILE)
     
     if result:
         print(f"\n✅ Success! Notes have been generated and saved.")

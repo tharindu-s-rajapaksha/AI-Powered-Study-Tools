@@ -20,9 +20,10 @@
     "output_file": "D:/Desktop/Social Aspects of IT - Sinhala.md"
   },
   "pdf_note_generator": {
-    "pdf_file": "D:\\Desktop\\UNI\\~ACA - L4S1\\IN4640 - Machine Vision\\03. Point Operations\\L02 Point Operations.pdf",
-    "start_page": 11,
-    "end_page": 20
+    "pdf_file": "D:/Desktop/UNI/~ACA - L4S1/CM4650 - Semantic Web & Ontological Modelling/Slides/Lec 1 - Week 01.pdf",
+    "transcription_file": "D:/Desktop/UNI/~ACA - L4S1/CM4650 - Semantic Web & Ontological Modelling/Recordings/2025-11-19 SW & Ontology_Lec01_silence_removed_transcription.txt",
+    "start_page": 1,
+    "end_page": 30
   },
   "pdf_splitter": {
     "input_pdf": "D:/Desktop/UNI/~ACA - L3S2/IN3410 - Data Mining and Data Warehousing/Lectures/Chapter 3 Data Preprocessing/Chapter 3.pdf",
@@ -38,8 +39,8 @@
     "output_file": "D:/Desktop/UNI/~ACA - L3S1/CM3620 - Natural Language Processing/comparison_view.html"
   },
   "video_silence_remover": {
-    "input_file": "/home/tharindu-sathsara/Desktop/UNI/~ACA - L4S1/IN4630 - Game Theory/Recordings/2025-12-19 08-22-11 Lec 1.mp4",
-    "output_file": "/home/tharindu-sathsara/Desktop/UNI/~ACA - L4S1/IN4630 - Game Theory/Recordings/2025-12-19 08-22-11 Lec 1_silence_removed.mp4"
+    "input_file": "D:/Desktop/UNI/~ACA - L4S1/IN4630 - Game Theory/Recordings/2025-12-23 08-22-25 Lec 2.mp4",
+    "output_file": "D:/Desktop/UNI/~ACA - L4S1/IN4630 - Game Theory/Recordings/2025-12-23 08-22-25 Lec 2_silence_removed.mp4"
   },
   "subtitle_generator": {
     "video_path": "D:/Acedemic/Fourth Year/DL/DL - 06.mp4",
