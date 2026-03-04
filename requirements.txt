@@ -1,4 +1,4 @@
-# ⚠️ DEPRECATED: This file is maintained for backward compatibility only.
+# DEPRECATED: This file is maintained for backward compatibility only.
 # 
 # The project now uses uv package manager and pyproject.toml for dependency management.
 # 

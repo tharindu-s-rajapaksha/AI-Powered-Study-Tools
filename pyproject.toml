@@ -7,7 +7,7 @@ name = "ai-powered-study-tools"
 version = "1.0.0"
 description = "A comprehensive suite of Python utilities for automated video transcription, AI-assisted note generation, and lecture processing"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [
     { name = "Tharindu S Rajapaksha" }
@@ -25,7 +25,6 @@ classifiers = [
     "Intended Audience :: Education",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -36,9 +35,10 @@ dependencies = [
     # Core Transcription & Audio
     "faster-whisper==1.1.1",
     "PyAudio==0.2.14",
-    "numpy==1.23.5",
+    "numpy>=2.0.0,<2.3.0",
     "moviepy==1.0.3",
     "jumpcutter==0.1.6",
+    "tqdm>=4.60.0,<4.61.0",
     
     # Note Generation & Translation
     "google-generativeai==0.8.3",
@@ -54,6 +54,7 @@ dependencies = [
     
     # Utilities
     "python-dotenv==1.0.1",
+    "packaging>=23.0",
 ]
 
 [project.urls]
@@ -63,7 +64,7 @@ Issues = "https://github.com/tharindu-s-rajapaksha/AI-Powered-Study-Tools/issues
 
 [tool.uv]
 # uv configuration for Python package management
-python = "3.10"
+package = false
 
 [tool.uv.sources]
 # Add any custom package sources if needed

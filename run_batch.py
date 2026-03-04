@@ -1,6 +1,14 @@
 """
 Batch Runner for AI-Powered Study Tools
 Allows you to run any tool multiple times with different input configurations.
+
+Usage:
+  With uv (recommended):
+    uv run python run_batch.py
+
+  With pip/venv (legacy):
+    source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+    python run_batch.py
 """
 
 import json

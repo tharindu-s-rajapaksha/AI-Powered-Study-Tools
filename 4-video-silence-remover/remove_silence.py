@@ -12,6 +12,12 @@ import logging
 import platform
 from pathlib import Path
 import time
+import shutil
+import numpy as np
+import re
+import importlib.metadata as metadata
+from packaging.requirements import Requirement
+from packaging.version import Version
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -90,39 +96,113 @@ class SoundPlayer:
         os.system(f"afplay /System/Library/Sounds/{sound_name}.aiff &")
 
 def install_package(package, extra_args=None):
-    """Install a package using pip"""
-    cmd = [sys.executable, "-m", "pip", "install", package]
-    if extra_args:
-        cmd.extend(extra_args)
+    """Install a package using pip or fall back to uv pip."""
+    extra_args = extra_args or []
+
+    pip_cmd = [sys.executable, "-m", "pip", "install", package, *extra_args]
+    uv_cli = shutil.which("uv")
+
     try:
-        subprocess.check_call(cmd)
+        subprocess.check_call(pip_cmd)
         logger.info(f"Successfully installed {package}")
+        return
+    except Exception:
+        if not uv_cli:
+            logger.error(f"Failed to install {package}: pip unavailable")
+            sys.exit(1)
+
+    try:
+        uv_cmd = [uv_cli, "pip", "install", package, *extra_args]
+        subprocess.check_call(uv_cmd)
+        logger.info(f"Successfully installed {package} (uv)")
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to install {package}: {e}")
         sys.exit(1)
 
-def check_and_install_dependencies():
-    """Check and install required dependencies with version constraints"""
-    # Note: We install jumpcutter with --no-deps to avoid it downgrading moviepy
-    # since we are manually patching jumpcutter for moviepy 2.x compatibility.
+
+def patch_moviepy_for_numpy2():
+    """Patch moviepy's to_soundarray to work with NumPy 2.x stacker rules."""
+    try:
+        from moviepy.audio.AudioClip import AudioClip
+
+        def to_soundarray(self, tt=None, fps=None, quantize=False, nbytes=2, buffersize=50000):
+            if fps is None:
+                fps = self.fps
+
+            stacker = np.vstack if self.nchannels == 2 else np.hstack
+            max_duration = 1.0 * buffersize / fps
+
+            if tt is None:
+                if self.duration > max_duration:
+                    chunks = list(self.iter_chunks(fps=fps, quantize=quantize, nbytes=2, chunksize=buffersize))
+                    return stacker(chunks)
+                tt = np.arange(0, self.duration, 1.0 / fps)
+
+            snd_array = self.get_frame(tt)
+
+            if quantize:
+                snd_array = np.maximum(-0.99, np.minimum(0.99, snd_array))
+                inttype = {1: "int8", 2: "int16", 4: "int32"}[nbytes]
+                snd_array = (2 ** (8 * nbytes - 1) * snd_array).astype(inttype)
+
+            return snd_array
+
+        AudioClip.to_soundarray = to_soundarray
+    except Exception as e:
+        logger.warning(f"Could not patch moviepy for NumPy 2.x: {e}")
+
+
+def patch_moviepy_file_for_numpy2():
+    """Persistently patch AudioClip.py so jumpcutter CLI uses the NumPy-safe stacker."""
+    try:
+        import moviepy.audio.AudioClip as ac
+        audio_clip_path = Path(ac.__file__)
+        text = audio_clip_path.read_text()
+
+        pattern = r"return stacker\(self\.iter_chunks\(fps=fps, quantize=quantize,\s*nbytes=2, chunksize=buffersize\)\)"
+        replacement = "chunks = list(self.iter_chunks(fps=fps, quantize=quantize,\n                               nbytes=2, chunksize=buffersize))\n                return stacker(chunks)"
+
+        if re.search(pattern, text):
+            new_text = re.sub(pattern, replacement, text)
+            audio_clip_path.write_text(new_text)
+            logger.info("Patched moviepy AudioClip.py for NumPy 2.x")
+        else:
+            logger.debug("MoviePy AudioClip.py already patched or pattern not found")
+    except Exception as e:
+        logger.warning(f"Could not persistently patch moviepy file: {e}")
+
+def ensure_dependencies():
+    """Ensure required dependencies are present; instruct user to sync otherwise."""
     required_packages = {
-        "moviepy": "moviepy>=2.2.1",
+        "moviepy": "moviepy==1.0.3",
         "numpy": "numpy>=2.0.0",
-        "tqdm": "tqdm>=4.65.0",
-        "jumpcutter": "jumpcutter"
+        "tqdm": "tqdm>=4.60.0,<4.61.0",
+        "jumpcutter": "jumpcutter==0.1.6",
     }
-    
-    logger.info("Checking and installing dependencies...")
-    
-    import pkg_resources
-    
-    for package_name, install_spec in required_packages.items():
+
+    logger.info("Checking dependencies...")
+
+    def is_satisfied(install_spec: str) -> bool:
+        req = Requirement(install_spec)
         try:
-            pkg_resources.require(install_spec)
-        except (pkg_resources.DistributionNotFound, pkg_resources.VersionConflict, Exception):
-            logger.info(f"Installing/Updating {install_spec}...")
-            extra_args = ["--no-deps"] if package_name == "jumpcutter" else None
-            install_package(install_spec, extra_args)
+            installed_version = metadata.version(req.name)
+        except metadata.PackageNotFoundError:
+            return False
+        if not req.specifier:
+            return True
+        try:
+            return req.specifier.contains(Version(installed_version), prereleases=True)
+        except Exception:
+            return False
+
+    missing = [spec for spec in required_packages.values() if not is_satisfied(spec)]
+    if missing:
+        logger.error(
+            "Missing or incompatible packages: %s. "
+            "Run 'UV_PROJECT_ENVIRONMENT=.venv uv sync' once, or activate .venv before running."
+            % ", ".join(missing)
+        )
+        sys.exit(1)
 
 def load_config():
     """Load configuration from inputs.json"""
@@ -259,8 +339,12 @@ def main():
     sound_player = SoundPlayer()
     sound_player.play_sound("start")
 
-    # Install dependencies
-    check_and_install_dependencies()
+    # Validate dependencies (installed via uv sync or activated .venv)
+    ensure_dependencies()
+
+    # Patch moviepy for NumPy 2.x compatibility
+    patch_moviepy_for_numpy2()
+    patch_moviepy_file_for_numpy2()
     
     # Load configuration
     video_info = load_config()
