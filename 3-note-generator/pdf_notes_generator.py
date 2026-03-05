@@ -16,7 +16,7 @@ import fitz  # PyMuPDF
 load_dotenv()
 
 # Gemini LLM model name
-LLM_MODEL = "gemini-flash-latest"
+LLM_MODEL = "gemini-3-flash-preview"
 
 # Define a global variable for language
 # LANGUAGE = "English"
@@ -228,8 +228,11 @@ CONTEXT INFORMATION (for reference and enhanced understanding):
 
 TASK
 - You are given PDF pages {start_page}-{end_page} from a lecture note.
-- Use the context information above (lecture summary and/or transcription) to better understand the content and provide more accurate and comprehensive explanations.
-- Focus on explaining the content from the PDF pages {start_page}-{end_page}, but enrich your explanations with insights from the transcription when relevant. If you add anything from the lecture transcription, state it clearly.
+- Use the transcription above (if it is provided) to improve the explanation of the slides.
+- Focus mainly on explaining the content from the slides on pages {start_page}-{end_page}.
+- Do NOT summarize the slides. Instead, explain every point shown on the slides in detail using simple explanations.
+- If the transcription contains extra explanations related to the slide, include them and clearly mention it like: "The lecturer said that...", "According to the lecturer...".
+- If no transcription is provided, simply explain the slide content normally.
 - IMPORTANT: Explain everything VERY VERY SIMPLY in {LANGUAGE} language - like explaining to a friend who doesn't know anything about this topic. Use everyday simple {LANGUAGE} words that anyone can understand easily. Break down complex ideas into simple, easy-to-understand explanations. Make it as simple as possible - like teaching a beginner.
 - Write in a friendly, conversational {LANGUAGE} style - as if you're having a casual chat with a friend over tea. Use simple everyday language.
 - Include ALL the exact details but explain them in the SIMPLEST {LANGUAGE} possible - do not skip or omit anything, just make it easy to understand
@@ -368,6 +371,20 @@ OUTPUT FORMAT (strict)
             self.print_progress(f"Error saving notes: {e}")
             self.sound_player.play_sound("error")
             raise
+
+    def clean_markdown(self, text: str):
+        """Clean up markdown formatting issues."""
+        # Add extra newlines before bullet points and numbered lists
+        text = re.sub(r'(:\n\*)', ':\n\n*', text)
+        text = re.sub(r'(.\n\*)', '.\n\n*', text)
+        
+        # Remove excessive newlines around horizontal rules
+        text = re.sub(r'---\n\n.*\n\n---', '---', text)
+        
+        # Ensure numbered lists have proper spacing
+        text = re.sub(r'([^\n])\n(\d+\.)', r'\1\n\n\2', text)
+        
+        return text
             
     def convert_to_html(self, notes_file: str, image_paths: list = None, start_page: int = 1, end_page: int = 1):
         """Convert the markdown notes to styled HTML with interleaved PDF slide images."""
@@ -407,8 +424,7 @@ OUTPUT FORMAT (strict)
                         page_content = page_sections.get(page_num, "")
                         if page_content:
                             # Clean up the markdown
-                            page_content = re.sub(r'(:\n\*)', ':\n\n*', page_content)
-                            page_content = re.sub(r'(.\n\*)', '.\n\n*', page_content)
+                            page_content = self.clean_markdown(page_content)
                             
                             # Convert to HTML
                             explanation_html = markdown.markdown(page_content)
@@ -431,9 +447,10 @@ OUTPUT FORMAT (strict)
                         self.print_progress(f"Warning: Could not process page {page_num}: {e}")
             else:
                 # No images, just convert all notes to HTML
-                notes_text = re.sub(r'(:\n\*)', ':\n\n*', notes_text)
-                notes_text = re.sub(r'(.\n\*)', '.\n\n*', notes_text)
-                notes_text = re.sub(r'---\n\n.*\n\n---', '---', notes_text)
+
+                # Clean markdown formatting
+                notes_text = self.clean_markdown(notes_text)
+                
                 interleaved_html = markdown.markdown(notes_text)
             
             # Add styling
@@ -776,3 +793,16 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    # # Test convert_to_html with sample data
+    # generator = SimplePDFNotesGenerator(api_key=os.getenv("GOOGLE_API_KEY"))
+    # notes_file = r"D:\Desktop\UNI\~ACA - L4S1\CM4650 - Semantic Web & Ontological Modelling\Slides\Lec 2 - Week 02_pages_1-32\Lec 2 - Week 02_pages_1-32_notes.md"
+    # image_paths = []  # Empty list if no images, or populate with actual image paths
+    # start_page = 1
+    # end_page = 32
+
+    # result = generator.convert_to_html(notes_file, image_paths, start_page, end_page)
+    # if result:
+    #     print(f"HTML file created: {result}")
+    # else:
+    #     print("Failed to create HTML file")

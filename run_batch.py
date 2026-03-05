@@ -119,6 +119,7 @@ def main():
     tool_key = "video_silence_remover"  # Change this to run different tools
     
     # Define your batch configurations here
+
     # For PDF Note Generator - specify page ranges:
     # batch_configs = [{
     #     "start_page": start,
@@ -130,6 +131,15 @@ def main():
     #     (61, 80),
     #     (81, 104)
     # ]]
+
+    # batch_configs = [
+    #     {
+    #         "pdf_file": "D:/Desktop/UNI/~ACA - L4S1/CM4650 - Semantic Web & Ontological Modelling/Slides/Lec 2 - Week 02.pdf",
+    #         "transcription_file": "D:/Desktop/UNI/~ACA - L4S1/CM4650 - Semantic Web & Ontological Modelling/Recordings/2025-11-26 SW & Ontology_Lec02_silence_removed_transcription.txt",
+    #         "start_page": 1,
+    #         "end_page": 40
+    #     },
+    # ]
     
     # For other tools, specify field values for each batch:
     
@@ -142,52 +152,19 @@ def main():
     
     # Example for video transcriber:
     # batch_configs = [
-    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec01_silence_removed.mp4"},
-    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec02_silence_removed.mp4"},
-    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec03_silence_removed.mp4"},
-    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec04_silence_removed.mp4"},
-    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec06_silence_removed.mp4"},
-    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec08_silence_removed.mp4"},
-    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4730 - Deep Learning/Recordings/Deep Learning Lec09_silence_removed.mp4"},
+    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Recordings/2026-01-08 philosophy Lec_03(1)_silence_removed.mkv"},
+    #     {"video_path": "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Recordings/2026-02-14 philosophy Lec_09_silence_removed.mkv"},
     # ]
-
+ 
     # Example for video silence remover:
     batch_configs = [
         {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-17 RS_Lec_01.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-17 RS_Lec_01_silence_removed.mp4"
-        },
-        {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-25 RS_Lec_02.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-11-25 RS_Lec_02_silence_removed.mp4"
-        },
-        {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-12-16 RS_Lec03.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2025-12-16 RS_Lec03_silence_removed.mp4"
-        },
-        {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-06 RS_ Lec04.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-06 RS_ Lec04_silence_removed.mp4"
-        },
-        {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-20 RS_ Lec05.mp4",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-20 RS_ Lec05_silence_removed.mp4"
-        },
-        {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-27 RS_ Lec06.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-01-27 RS_ Lec06_silence_removed.mp4"
-        },
-        {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-02-03 Lec07.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-02-03 Lec07_silence_removed.mp4"
-        },
-        {
-            "input_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-02-10 RS_ Lec08.mkv",
-            "output_file": "D:/Desktop/UNI/~ACA - L4S1/CM4150 - Recommender Systems/Recordings/2026-02-10 RS_ Lec08_silence_removed.mp4"
+            "input_file": "D:/Desktop/UNI/~ACA - L4S1/IN4630 - Game Theory/Recordings/2026-02-13 Lec 6.mp4",
+            "output_file": "D:/Desktop/UNI/~ACA - L4S1/IN4630 - Game Theory/Recordings/2026-02-13 Lec 6_silence_removed.mp4"
         },
     ]
     
-    # Example for pdf_splitter:
+    # Example for pdf_splitter: 
     # batch_configs = [
     #     {"input_pdf": "path1.pdf", "rows": 2, "cols": 1},
     #     {"input_pdf": "path2.pdf", "rows": 2, "cols": 1},
