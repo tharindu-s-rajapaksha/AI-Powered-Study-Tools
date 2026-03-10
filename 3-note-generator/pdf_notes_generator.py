@@ -374,15 +374,27 @@ OUTPUT FORMAT (strict)
 
     def clean_markdown(self, text: str):
         """Clean up markdown formatting issues."""
-        # Add extra newlines before bullet points and numbered lists
-        text = re.sub(r'(:\n\*)', ':\n\n*', text)
-        text = re.sub(r'(.\n\*)', '.\n\n*', text)
+        
+        # Add blank line after bullet heading (**...**:) before content
+        text = re.sub(r'(\*\*[^*]+\*\*:)\n(?!\n)', r'\1\n\n', text)
+        
+        # Add blank line before bullet/numbered lists that follow a colon
+        text = re.sub(r'(:\n)(\s*[\*\-]|\s*\d+\.)', r':\n\n\2', text)
+        
+        # Add blank line between numbered list items
+        text = re.sub(r'([^\n])\n(\s{0,4}\d+\.\s)', r'\1\n\n\2', text)
+        
+        # Add blank line before nested bullet points inside numbered items
+        text = re.sub(r'([^\n])\n(\s{4,}\*)', r'\1\n\n\2', text)
+        
+        # Add blank line before top-level bullet points after sentence-ending lines
+        text = re.sub(r'([^\n])\n(\*)', r'\1\n\n\2', text)
+        
+        # Remove excessive newlines (3+ → 2)
+        text = re.sub(r'\n{3,}', '\n\n', text)
         
         # Remove excessive newlines around horizontal rules
         text = re.sub(r'---\n\n.*\n\n---', '---', text)
-        
-        # Ensure numbered lists have proper spacing
-        text = re.sub(r'([^\n])\n(\d+\.)', r'\1\n\n\2', text)
         
         return text
             
@@ -796,10 +808,16 @@ if __name__ == "__main__":
 
     # # Test convert_to_html with sample data
     # generator = SimplePDFNotesGenerator(api_key=os.getenv("GOOGLE_API_KEY"))
-    # notes_file = r"D:\Desktop\UNI\~ACA - L4S1\CM4650 - Semantic Web & Ontological Modelling\Slides\Lec 2 - Week 02_pages_1-32\Lec 2 - Week 02_pages_1-32_notes.md"
-    # image_paths = []  # Empty list if no images, or populate with actual image paths
+    # notes_file = r"D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Gayuni's Note_pages_1-4/Gayuni's Note_pages_1-4_notes.md"
+    # image_paths = [
+    #     "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Ann's Note_pages_1-5/page_1.png",
+    #     "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Ann's Note_pages_1-5/page_2.png",
+    #     "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Ann's Note_pages_1-5/page_3.png",
+    #     "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Ann's Note_pages_1-5/page_4.png",
+    #     "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Ann's Note_pages_1-5/page_5.png",
+    # ]  # Empty list if no images, or populate with actual image paths
     # start_page = 1
-    # end_page = 32
+    # end_page = 6
 
     # result = generator.convert_to_html(notes_file, image_paths, start_page, end_page)
     # if result:
