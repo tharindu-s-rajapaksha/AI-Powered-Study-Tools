@@ -7,6 +7,7 @@ import json
 import platform
 import base64
 from datetime import datetime
+from typing import List, Optional, Tuple
 from google import genai
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader, PdfWriter
@@ -103,6 +104,14 @@ class SimplePDFNotesGenerator:
         
         # Initialize sound player
         self.sound_player = SoundPlayer()
+
+        # Chunking: large page ranges tend to get summarized by the model.
+        # Generating notes in smaller page windows keeps outputs detailed.
+        self.pages_per_chunk = 4
+
+        # When chunking, multiple extracted PDFs are created locally; keep only the
+        # main extracted PDF for the full requested range.
+        self.delete_temporary_chunk_pdfs = True
         
     def print_progress(self, message: str, sound_type: str = None):
         """Print a progress message with timestamp and optional sound."""
@@ -204,6 +213,73 @@ class SimplePDFNotesGenerator:
         except Exception as e:
             self.print_progress(f"Warning: Could not load transcription file: {e}")
             return ""
+
+    def split_page_range(self, start_page: int, end_page: int, pages_per_chunk: Optional[int] = None):
+        """Split an inclusive page range into smaller inclusive chunks."""
+        if pages_per_chunk is None:
+            pages_per_chunk = self.pages_per_chunk
+
+        pages_per_chunk = int(pages_per_chunk)
+        if pages_per_chunk <= 0:
+            raise ValueError("pages_per_chunk must be a positive integer")
+
+        if end_page < start_page:
+            return []
+
+        ranges: List[Tuple[int, int]] = []
+        chunk_start = start_page
+        while chunk_start <= end_page:
+            chunk_end = min(chunk_start + pages_per_chunk - 1, end_page)
+            ranges.append((chunk_start, chunk_end))
+            chunk_start = chunk_end + 1
+        return ranges
+
+    def _extract_uploaded_file_name(self, pdf_file) -> Optional[str]:
+        """Best-effort extraction of an uploaded file resource name for deletion.
+
+        google-genai typically expects a resource name like: "files/<id>".
+        Different SDK versions / return shapes may wrap the file object.
+        """
+        if pdf_file is None:
+            return None
+
+        # Common cases
+        if isinstance(pdf_file, str):
+            candidate = pdf_file
+        elif isinstance(pdf_file, dict):
+            candidate = pdf_file.get("name") or pdf_file.get("id") or pdf_file.get("file")
+        else:
+            # Wrapped objects (e.g., response.file)
+            if hasattr(pdf_file, "file"):
+                inner = getattr(pdf_file, "file")
+                candidate = self._extract_uploaded_file_name(inner)
+            else:
+                candidate = getattr(pdf_file, "name", None) or getattr(pdf_file, "id", None)
+
+        if not candidate:
+            return None
+
+        # If the candidate is still a non-string object, recurse once more.
+        if not isinstance(candidate, str):
+            return self._extract_uploaded_file_name(candidate)
+
+        name = candidate.strip()
+        if not name:
+            return None
+
+        # URIs are not valid identifiers for delete().
+        if name.startswith("http://") or name.startswith("https://"):
+            return None
+
+        # Normalize to expected resource name form when possible.
+        if name.startswith("files/"):
+            return name
+
+        # If it's a bare id like "abc123", convert to "files/abc123".
+        if "/" not in name and "\\" not in name:
+            return f"files/{name}"
+
+        return name
     
     def generate_notes_from_pdf(self, pdf_file, start_page, end_page, summary: str = "", transcription: str = ""):
         """Generate notes from the uploaded PDF with optional transcription context."""
@@ -237,6 +313,7 @@ TASK
 - Write in a friendly, conversational {LANGUAGE} style - as if you're having a casual chat with a friend over tea. Use simple everyday language.
 - Include ALL the exact details but explain them in the SIMPLEST {LANGUAGE} possible - do not skip or omit anything, just make it easy to understand
 - Add important technical terms, concepts, and definitions in both SIMPLE {LANGUAGE} explanations AND English (since I need to learn in English)
+- FORMULAS: Do NOT use LaTeX or Inline Math symbols (like $ or _). Write formulas as simple one-line text only if they are very simple. For complex formulas, do NOT try to rewrite them; instead, simply refer to them on the slide (e.g., "See the first formula on the slide", "The complex equation at the bottom of the slide explains...").
 
 MARKDOWN RULES (very important)
 - Use headings, bullet lists, bold/italic, and short paragraphs.
@@ -513,7 +590,7 @@ OUTPUT FORMAT (strict)
             padding-bottom: 8px;
         }}
         .pdf-slide {{
-            width: 80%;
+            width: 90%;
             height: auto;
             border: 1px solid #dee2e6;
             border-radius: 4px;
@@ -690,10 +767,25 @@ Write the summary in English."""
     def cleanup_uploaded_file(self, pdf_file):
         """Clean up the uploaded file from Gemini."""
         try:
-            self.client.files.delete(name=pdf_file.name)
-            self.print_progress("Cleaned up uploaded PDF file")
+            file_name = self._extract_uploaded_file_name(pdf_file)
+            if not file_name:
+                self.print_progress(
+                    f"Could not cleanup uploaded file: missing file identifier (type={type(pdf_file)})"
+                )
+                return
+
+            try:
+                self.client.files.delete(name=file_name)
+                self.print_progress(f"Cleaned up uploaded PDF file: {file_name}")
+            except Exception as delete_error:
+                # Sometimes the file isn't immediately deletable (still processing).
+                time.sleep(2)
+                self.client.files.delete(name=file_name)
+                self.print_progress(f"Cleaned up uploaded PDF file (retry): {file_name}")
         except Exception as e:
-            self.print_progress(f"Could not cleanup uploaded file: {e}")
+            self.print_progress(
+                f"Could not cleanup uploaded file (type={type(pdf_file)}): {e}"
+            )
             
     def generate_notes(self, pdf_path: str, start_page: int, end_page: int, transcription_file: str = ""):
         """Main method to generate notes from PDF with optional transcription."""
@@ -729,15 +821,58 @@ Write the summary in English."""
             
             # Convert PDF pages to images
             image_paths = self.convert_pdf_pages_to_images(extracted_pdf_path, output_folder)
-            
-            # Upload extracted PDF to Gemini
-            pdf_file = self.upload_pdf_to_gemini(extracted_pdf_path)
 
-            # Override summary for specific page range
-            # summary = "Summary not provided. Because the full PDF has been given currently. So explain exact everything in the given PDF pages."
-            
-            # Generate notes with summary and optional transcription context
-            notes = self.generate_notes_from_pdf(pdf_file, start_page, end_page, summary, transcription)
+            # Generate notes (chunked for large ranges, to avoid model summarization)
+            total_pages_requested = end_page - start_page + 1
+            if total_pages_requested <= self.pages_per_chunk:
+                # Upload extracted PDF to Gemini (single call)
+                pdf_file = self.upload_pdf_to_gemini(extracted_pdf_path)
+
+                # Override summary for specific page range
+                # summary = "Summary not provided. Because the full PDF has been given currently. So explain exact everything in the given PDF pages."
+
+                # Generate notes with summary and optional transcription context
+                notes = self.generate_notes_from_pdf(pdf_file, start_page, end_page, summary, transcription)
+            else:
+                page_chunks = self.split_page_range(start_page, end_page)
+                self.print_progress(
+                    f"Large range detected ({total_pages_requested} pages). Generating notes in {len(page_chunks)} chunks of {self.pages_per_chunk} pages..."
+                )
+
+                notes_parts: List[str] = []
+                for idx, (chunk_start, chunk_end) in enumerate(page_chunks, start=1):
+                    self.print_progress(f"Chunk {idx}/{len(page_chunks)}: pages {chunk_start}-{chunk_end}")
+
+                    chunk_pdf_file = None
+                    chunk_pdf_path = None
+                    try:
+                        chunk_pdf_path = self.extract_pdf_pages(pdf_path, chunk_start, chunk_end, output_folder)
+                        chunk_pdf_file = self.upload_pdf_to_gemini(chunk_pdf_path)
+                        chunk_notes = self.generate_notes_from_pdf(
+                            chunk_pdf_file,
+                            chunk_start,
+                            chunk_end,
+                            summary,
+                            transcription,
+                        )
+                        notes_parts.append(chunk_notes)
+                    finally:
+                        if chunk_pdf_file:
+                            self.cleanup_uploaded_file(chunk_pdf_file)
+
+                        # Remove the local temporary chunk PDF to avoid clutter.
+                        if (
+                            self.delete_temporary_chunk_pdfs
+                            and chunk_pdf_path
+                            and os.path.exists(chunk_pdf_path)
+                            and os.path.abspath(chunk_pdf_path) != os.path.abspath(extracted_pdf_path)
+                        ):
+                            try:
+                                os.remove(chunk_pdf_path)
+                            except Exception as e:
+                                self.print_progress(f"Warning: Could not delete temp chunk PDF: {e}")
+
+                notes = "\n\n".join(notes_parts)
             
             # Save notes
             notes_file = self.save_notes(notes, pdf_path, start_page, end_page, output_folder)
@@ -808,13 +943,11 @@ if __name__ == "__main__":
 
     # # Test convert_to_html with sample data
     # generator = SimplePDFNotesGenerator(api_key=os.getenv("GOOGLE_API_KEY"))
-    # notes_file = r"D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Gayuni's Note_pages_1-4/Gayuni's Note_pages_1-4_notes.md"
+    # notes_file = r"D:/Desktop/Ann's Note_pages_8-10/Ann's Note_pages_8-10_notes.md"
     # image_paths = [
-    #     "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Ann's Note_pages_1-5/page_1.png",
-    #     "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Ann's Note_pages_1-5/page_2.png",
-    #     "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Ann's Note_pages_1-5/page_3.png",
-    #     "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Ann's Note_pages_1-5/page_4.png",
-    #     "D:/Desktop/UNI/~ACA - L4S1/CM4560 - Philosophy of Science (NGPA)/Ann's Note_pages_1-5/page_5.png",
+    #     "D:/Desktop/Ann's Note_pages_8-10/page_1.png",
+    #     "D:/Desktop/Ann's Note_pages_8-10/page_2.png",
+    #     "D:/Desktop/Ann's Note_pages_8-10/page_3.png",
     # ]  # Empty list if no images, or populate with actual image paths
     # start_page = 1
     # end_page = 6
