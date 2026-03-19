@@ -9,6 +9,7 @@ import base64
 from datetime import datetime
 from typing import List, Optional, Tuple
 from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader, PdfWriter
 import fitz  # PyMuPDF
@@ -112,6 +113,11 @@ class SimplePDFNotesGenerator:
         # When chunking, multiple extracted PDFs are created locally; keep only the
         # main extracted PDF for the full requested range.
         self.delete_temporary_chunk_pdfs = True
+
+        # Summary generation: some large PDFs cannot be summarized in a single call
+        # (API may return INVALID_ARGUMENT). Fall back to chunked summary.
+        self.summary_pages_per_chunk = 25
+        self.delete_temporary_summary_pdfs = True
         
     def print_progress(self, message: str, sound_type: str = None):
         """Print a progress message with timestamp and optional sound."""
@@ -186,7 +192,13 @@ class SimplePDFNotesGenerator:
             pdf_file = self.client.files.upload(file=file_path)
             self.print_progress(f"PDF uploaded successfully")
             self.sound_player.play_sound("step")
-                
+
+            # Wait until the uploaded file is actually ready (ACTIVE).
+            # If we call generate_content too early, the API can return INVALID_ARGUMENT.
+            uploaded_name = self._extract_uploaded_file_name(pdf_file)
+            if uploaded_name:
+                pdf_file = self.wait_for_uploaded_file_active(uploaded_name, timeout_seconds=180)
+
             self.print_progress("PDF processed successfully and ready for analysis")
             return pdf_file
             
@@ -194,6 +206,133 @@ class SimplePDFNotesGenerator:
             self.print_progress(f"Error uploading PDF: {e}")
             self.sound_player.play_sound("error")
             raise
+
+    def wait_for_uploaded_file_active(
+        self,
+        uploaded_name: str,
+        timeout_seconds: int = 180,
+        poll_seconds: float = 2.0,
+    ):
+        """Poll until an uploaded file becomes ACTIVE (or timeout).
+
+        Returns the latest File object from `files.get()`.
+        """
+        start_time = time.time()
+        last_file = None
+
+        while True:
+            try:
+                last_file = self.client.files.get(name=uploaded_name)
+                state = getattr(last_file, "state", None)
+
+                if state == types.FileState.ACTIVE:
+                    return last_file
+
+                if state == types.FileState.FAILED:
+                    error_info = getattr(last_file, "error", None)
+                    raise RuntimeError(f"Uploaded file processing failed: {error_info}")
+            except Exception:
+                # If polling fails transiently, keep trying until timeout.
+                pass
+
+            if time.time() - start_time >= timeout_seconds:
+                self.print_progress(
+                    f"Warning: File not ACTIVE after {timeout_seconds}s; continuing anyway: {uploaded_name}"
+                )
+                return last_file
+
+            time.sleep(poll_seconds)
+
+    def _summarize_uploaded_pdf_file(self, pdf_file, summary_prompt: str) -> str:
+        """Generate a summary for an uploaded PDF file (single call)."""
+        response = self.client.models.generate_content(
+            model=LLM_MODEL,
+            contents=[pdf_file, summary_prompt],
+        )
+        return response.text
+
+    def generate_summary_in_chunks(self, pdf_path: str, base_name: str, summary_prompt: str) -> str:
+        """Fallback summary for large PDFs: summarize smaller page ranges then merge."""
+        total_pages = len(PdfReader(pdf_path).pages)
+        if total_pages <= 0:
+            return ""
+
+        pdf_dir = os.path.dirname(pdf_path)
+        tmp_folder = os.path.join(pdf_dir, f"{base_name}_summary_chunks")
+        os.makedirs(tmp_folder, exist_ok=True)
+
+        page_chunks = self.split_page_range(1, total_pages, pages_per_chunk=self.summary_pages_per_chunk)
+        self.print_progress(
+            f"Full-PDF summary failed; generating summary in {len(page_chunks)} chunks of {self.summary_pages_per_chunk} pages..."
+        )
+
+        chunk_summaries: List[str] = []
+        for idx, (chunk_start, chunk_end) in enumerate(page_chunks, start=1):
+            self.print_progress(f"Summary chunk {idx}/{len(page_chunks)}: pages {chunk_start}-{chunk_end}")
+
+            chunk_pdf_path = None
+            chunk_pdf_file = None
+            try:
+                chunk_pdf_path = self.extract_pdf_pages(pdf_path, chunk_start, chunk_end, tmp_folder)
+                chunk_pdf_file = self.upload_pdf_to_gemini(chunk_pdf_path)
+
+                # Adjust prompt to reflect that this is a partial PDF segment.
+                chunk_prompt = (
+                    summary_prompt.strip()
+                    + f"\n\nNOTE: This PDF contains only pages {chunk_start}-{chunk_end} of the full document. Summarize ONLY these pages."
+                )
+
+                # Retry once per chunk (rare transient issues)
+                try:
+                    chunk_summary = self._summarize_uploaded_pdf_file(chunk_pdf_file, chunk_prompt)
+                except Exception as e1:
+                    self.print_progress(f"Chunk summary failed once, retrying: {e1}")
+                    time.sleep(3)
+                    chunk_summary = self._summarize_uploaded_pdf_file(chunk_pdf_file, chunk_prompt)
+
+                chunk_summaries.append(
+                    f"---CHUNK {idx} (pages {chunk_start}-{chunk_end})---\n{chunk_summary}".strip()
+                )
+            finally:
+                if chunk_pdf_file:
+                    self.cleanup_uploaded_file(chunk_pdf_file)
+
+                if (
+                    self.delete_temporary_summary_pdfs
+                    and chunk_pdf_path
+                    and os.path.exists(chunk_pdf_path)
+                ):
+                    try:
+                        os.remove(chunk_pdf_path)
+                    except Exception as e:
+                        self.print_progress(f"Warning: Could not delete temp summary PDF: {e}")
+
+        combined = "\n\n".join(chunk_summaries)
+
+        merge_prompt = f"""
+You are given multiple partial summaries of different page ranges from a single lecture PDF.
+
+Combine them into one cohesive overall summary of the entire PDF.
+Requirements:
+1. Cover all major topics, concepts, and structure mentioned across the parts.
+2. Avoid duplicates.
+3. Keep it clear and well-organized.
+4. Write in English.
+
+PARTIAL SUMMARIES:
+{combined}
+""".strip()
+
+        self.print_progress("Merging chunk summaries into final PDF summary...")
+        try:
+            merged_response = self.client.models.generate_content(
+                model=LLM_MODEL,
+                contents=[merge_prompt],
+            )
+            return merged_response.text
+        except Exception as e:
+            self.print_progress(f"Warning: Could not merge chunk summaries: {e}")
+            return combined
             
     def load_transcription(self, transcription_file: str) -> str:
         """Load transcription from file if it exists."""
@@ -736,13 +875,15 @@ Keep the summary detailed enough to give context for explaining specific section
 Write the summary in English."""
 
             self.print_progress("Generating full PDF summary...")
-            
-            response = self.client.models.generate_content(
-                model=LLM_MODEL,
-                contents=[pdf_file, summary_prompt]
-            )
-            
-            summary = response.text
+
+            # Some PDFs intermittently fail with INVALID_ARGUMENT if the file isn't fully ready;
+            # upload_pdf_to_gemini() already waits for ACTIVE, but we also retry once here.
+            try:
+                summary = self._summarize_uploaded_pdf_file(pdf_file, summary_prompt)
+            except Exception as e1:
+                self.print_progress(f"Summary generation failed once, retrying: {e1}")
+                time.sleep(3)
+                summary = self._summarize_uploaded_pdf_file(pdf_file, summary_prompt)
             
             # Save summary
             with open(summary_file, "w", encoding='utf-8') as f:
@@ -758,6 +899,23 @@ Write the summary in English."""
         except Exception as e:
             self.print_progress(f"Error generating summary: {e}")
             self.sound_player.play_sound("error")
+
+            # Fallback: chunked summary (prevents INVALID_ARGUMENT for large PDFs)
+            try:
+                base_name = os.path.splitext(os.path.basename(pdf_path))[0]
+                summary = self.generate_summary_in_chunks(pdf_path, base_name, summary_prompt)
+                if summary:
+                    with open(summary_file, "w", encoding='utf-8') as f:
+                        f.write(f"Summary of {base_name}\n")
+                        f.write(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+                        f.write("="*80 + "\n\n")
+                        f.write(summary)
+                    self.print_progress(f"Summary saved to: {summary_file}")
+                    return summary
+            except Exception as e2:
+                self.print_progress(f"Warning: Chunked summary also failed: {e2}")
+
+            # If summary can't be generated, proceed without it.
             return ""
             
         finally:
