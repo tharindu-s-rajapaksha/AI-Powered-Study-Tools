@@ -54,44 +54,6 @@ AI-Powered-Study-Tools/
 └── README.md
 ```
 
-## ⚡ Quick Start
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/tharindu-s-rajapaksha/AI-Powered-Study-Tools.git
-cd AI-Powered-Study-Tools
-
-# 2. Install uv (if not already installed)
-# macOS / Linux:
-curl -LsSf https://astral.sh/uv/install.sh | sh
-# Windows (with pipx):
-pipx install uv
-# Or download from: https://github.com/astral-sh/uv/releases
-
-# 3. Install dependencies
-uv sync
-
-# 4. Activate the virtual environment (optional but recommended)
-# Windows:
-.venv\Scripts\activate
-# macOS / Linux:
-source .venv/bin/activate
-# OR use uv run to automatically run commands in the venv (recommended):
-uv run python <script.py>
-
-# 5. Set up API keys
-cp .env.example .env
-# Edit .env and add your GOOGLE_API_KEY
-
-# 6. Configure inputs
-# Edit inputs.json with your file paths
-
-# 7. Run a tool
-uv run python 1-video-transcriber/transcribe_video.py
-# OR run batch
-uv run python run_batch.py
-```
-
 ## 📋 Installation & Requirements
 
 - **Python 3.8+** (3.10+ recommended)
