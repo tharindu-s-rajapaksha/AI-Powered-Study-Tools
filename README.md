@@ -71,14 +71,22 @@ pipx install uv
 # 3. Install dependencies
 uv sync
 
-# 4. Set up API keys
+# 4. Activate the virtual environment (optional but recommended)
+# Windows:
+.venv\Scripts\activate
+# macOS / Linux:
+source .venv/bin/activate
+# OR use uv run to automatically run commands in the venv (recommended):
+uv run python <script.py>
+
+# 5. Set up API keys
 cp .env.example .env
 # Edit .env and add your GOOGLE_API_KEY
 
-# 5. Configure inputs
+# 6. Configure inputs
 # Edit inputs.json with your file paths
 
-# 6. Run a tool
+# 7. Run a tool
 uv run python 1-video-transcriber/transcribe_video.py
 # OR run batch
 uv run python run_batch.py
@@ -115,14 +123,16 @@ cd AI-Powered-Study-Tools
 # Install all dependencies
 uv sync
 
-# Step 3: Activate Environment (Optional but Recommended)
-# This allows you to run 'python' directly instead of 'uv run python'
+# Activate the virtual environment (optional but recommended)
 # Windows:
 .venv\Scripts\activate
 # macOS / Linux:
 source .venv/bin/activate
+```
 
-### Step 4: Install Dependencies
+**Note:** If you activate the venv, you can run Python scripts directly. Otherwise, use `uv run python <script>` to automatically run within the environment.
+
+### Step 3: Install Dependencies
 
 All dependencies are managed through `pyproject.toml`. The `uv sync` command above handles everything:
 
