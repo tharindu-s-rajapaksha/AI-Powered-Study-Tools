@@ -7,9 +7,47 @@ Generates SRT/VTT subtitles for lecture videos using Faster-Whisper.
 import os
 import sys
 import platform
+import site
 import json
 import logging
 from datetime import timedelta
+from pathlib import Path
+import warnings
+
+
+def _configure_windows_cuda_runtime():
+    """Add NVIDIA runtime bin folders to PATH so ctranslate2 can load CUDA DLLs on Windows."""
+    if platform.system() != "Windows":
+        return
+
+    search_roots = []
+    try:
+        search_roots.extend(site.getsitepackages())
+    except Exception:
+        pass
+
+    user_site = site.getusersitepackages()
+    if user_site:
+        search_roots.append(user_site)
+
+    cuda_bin_dirs = []
+    for root in search_roots:
+        nvidia_dir = Path(root) / "nvidia"
+        if not nvidia_dir.exists():
+            continue
+
+        for bin_dir in nvidia_dir.rglob("bin"):
+            if bin_dir.is_dir():
+                cuda_bin_dirs.append(str(bin_dir))
+
+    if cuda_bin_dirs:
+        current_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = os.pathsep.join(cuda_bin_dirs + [current_path])
+
+
+_configure_windows_cuda_runtime()
+warnings.filterwarnings("ignore", category=SyntaxWarning, module=r"moviepy(\.|$)")
+
 from moviepy.editor import VideoFileClip
 import ctranslate2
 from faster_whisper import WhisperModel
@@ -75,12 +113,31 @@ class LectureSubtitleGenerator:
         self.model = None
         self.sound_player = SoundPlayer()
 
+    def _is_cuda_library_error(self, error: Exception) -> bool:
+        """Return True when Faster-Whisper fails due to missing CUDA runtime libs."""
+        message = str(error).lower()
+        return "cublas" in message or "cuda" in message
+
+    def _switch_to_cpu(self):
+        """Switch runtime settings to CPU-safe defaults."""
+        self.device = "cpu"
+        self.compute_type = "int8"
+        self.model = None
+
     def load_model(self):
         """Load the Faster-Whisper model."""
         logger.info(f"Loading Faster-Whisper {self.model_size} model on {self.device}...")
         self.sound_player.play_sound("step")
-        self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
-        logger.info("Model loaded successfully!")
+        try:
+            self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
+        except Exception as e:
+            if self.device == "cuda" and self._is_cuda_library_error(e):
+                logger.warning("CUDA libraries are not available. Falling back to CPU mode.")
+                self._switch_to_cpu()
+                self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
+            else:
+                raise
+        logger.info(f"Model loaded successfully! (device={self.device}, compute_type={self.compute_type})")
         self.sound_player.play_sound("step")
 
     def format_timestamp(self, seconds: float, format_type: str = "srt") -> str:
@@ -123,7 +180,16 @@ class LectureSubtitleGenerator:
 
             logger.info("Transcribing and generating timestamps...")
             self.sound_player.play_sound("step")
-            segments, _ = self.model.transcribe(temp_audio, beam_size=5)
+            try:
+                segments, _ = self.model.transcribe(temp_audio, beam_size=5)
+            except Exception as e:
+                if self.device == "cuda" and self._is_cuda_library_error(e):
+                    logger.warning("CUDA runtime failed during subtitle generation. Retrying on CPU...")
+                    self._switch_to_cpu()
+                    self.load_model()
+                    segments, _ = self.model.transcribe(temp_audio, beam_size=5)
+                else:
+                    raise
 
             if output_path is None:
                 output_path = os.path.splitext(video_path)[0] + ".srt"

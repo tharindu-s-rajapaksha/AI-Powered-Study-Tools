@@ -114,9 +114,15 @@ cd AI-Powered-Study-Tools
 
 # Install all dependencies
 uv sync
-```
 
-### Step 3: Install Dependencies
+# Step 3: Activate Environment (Optional but Recommended)
+# This allows you to run 'python' directly instead of 'uv run python'
+# Windows:
+.venv\Scripts\activate
+# macOS / Linux:
+source .venv/bin/activate
+
+### Step 4: Install Dependencies
 
 All dependencies are managed through `pyproject.toml`. The `uv sync` command above handles everything:
 

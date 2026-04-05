@@ -52,6 +52,10 @@ dependencies = [
     "Pillow==11.3.0",
     "opencv-python==4.12.0.88",
     
+    # CUDA runtime (required by ctranslate2 on Windows for GPU inference)
+    "nvidia-cublas-cu12",
+    "nvidia-cuda-runtime-cu12",
+
     # Utilities
     "python-dotenv==1.0.1",
     "packaging>=23.0",

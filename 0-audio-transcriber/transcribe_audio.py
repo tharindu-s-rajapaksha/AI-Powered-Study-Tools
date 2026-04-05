@@ -1,5 +1,42 @@
 import os
 import platform
+import site
+from pathlib import Path
+
+
+def _configure_windows_cuda_runtime():
+    """Add NVIDIA runtime bin folders to PATH so ctranslate2 can load CUDA DLLs on Windows."""
+    if platform.system() != "Windows":
+        return
+
+    search_roots = []
+    try:
+        search_roots.extend(site.getsitepackages())
+    except Exception:
+        pass
+
+    user_site = site.getusersitepackages()
+    if user_site:
+        search_roots.append(user_site)
+
+    cuda_bin_dirs = []
+    for root in search_roots:
+        nvidia_dir = Path(root) / "nvidia"
+        if not nvidia_dir.exists():
+            continue
+
+        for bin_dir in nvidia_dir.rglob("bin"):
+            if bin_dir.is_dir():
+                cuda_bin_dirs.append(str(bin_dir))
+
+    if cuda_bin_dirs:
+        current_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = os.pathsep.join(cuda_bin_dirs + [current_path])
+
+
+_configure_windows_cuda_runtime()
+
+import ctranslate2
 from faster_whisper import WhisperModel
 import json
 
@@ -79,30 +116,57 @@ class SoundPlayer:
 class AudioTranscriber:
     """Transcribe audio files (mp3, m4a, wav, flac, etc.) to text using Faster-Whisper."""
     
-    def __init__(self, model_size="small", device="cuda", compute_type="int8"):
+    def __init__(self, model_size="small", device=None, compute_type=None):
         """
         Initialize the AudioTranscriber with the specified Whisper model parameters.
 
         Parameters:
         model_size (str): Size of the Whisper model to use ("tiny", "base", "small", "medium", "large").
-        device (str): Device to use for the model (e.g., "cuda", "cpu").
-        compute_type (str): Compute type for the model (e.g., "int8", "float32").
+        device (str): Device to use for the model (e.g., "cuda", "cpu"). If None, auto-detected.
+        compute_type (str): Compute type for the model. If None, set based on device.
         """
         self.model_size = model_size
-        self.device = device
-        self.compute_type = compute_type
+        if device is None:
+            self.device = "cuda" if ctranslate2.get_cuda_device_count() > 0 else "cpu"
+        else:
+            self.device = device
+
+        if compute_type is None:
+            self.compute_type = "float16" if self.device == "cuda" else "int8"
+        else:
+            self.compute_type = compute_type
+
         self.model = None
         self.sound_player = SoundPlayer()
         
         # Supported audio formats
         self.supported_formats = ('.mp3', '.m4a', '.wav', '.flac', '.ogg', '.opus', '.aac', '.wma')
 
+    def _is_cuda_library_error(self, error: Exception) -> bool:
+        """Return True when Faster-Whisper fails due to missing CUDA runtime libs."""
+        message = str(error).lower()
+        return "cublas" in message or "cuda" in message
+
+    def _switch_to_cpu(self):
+        """Switch runtime settings to CPU-safe defaults."""
+        self.device = "cpu"
+        self.compute_type = "int8"
+        self.model = None
+
     def load_model(self):
         """Load the Faster-Whisper model."""
         print(f"Loading Faster-Whisper {self.model_size} model...")
         self.sound_player.play_sound("step")
-        self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
-        print("Model loaded successfully!")
+        try:
+            self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
+        except Exception as e:
+            if self.device == "cuda" and self._is_cuda_library_error(e):
+                print("CUDA libraries are not available. Falling back to CPU mode.")
+                self._switch_to_cpu()
+                self.model = WhisperModel(self.model_size, device=self.device, compute_type=self.compute_type)
+            else:
+                raise
+        print(f"Model loaded successfully! (device={self.device}, compute_type={self.compute_type})")
         self.sound_player.play_sound("step")
 
     def transcribe_audio(self, audio_path, output_path=None):
@@ -136,7 +200,16 @@ class AudioTranscriber:
 
             print("Transcribing audio...")
             self.sound_player.play_sound("step")
-            segments, _ = self.model.transcribe(audio_path)
+            try:
+                segments, _ = self.model.transcribe(audio_path)
+            except Exception as e:
+                if self.device == "cuda" and self._is_cuda_library_error(e):
+                    print("CUDA runtime failed during transcription. Retrying on CPU...")
+                    self._switch_to_cpu()
+                    self.load_model()
+                    segments, _ = self.model.transcribe(audio_path)
+                else:
+                    raise
 
             transcription = ""
             for segment in segments:
@@ -218,5 +291,5 @@ if __name__ == "__main__":
     with open(inputs_path, "r") as f:
         inputs = json.load(f)
     
-    transcriber = AudioTranscriber(device="cuda")
+    transcriber = AudioTranscriber()
     transcriber.transcribe_one_audio(inputs["audio_transcriber"]["audio_path"])
